@@ -39,6 +39,10 @@ import java.util.stream.Collectors;
 
 /**
  * Model of dubbo framework, it can be shared with multiple applications.
+ * dubbo框架的模型，可以被多个应用程序共享
+ *
+ * @author huleilei9
+ * @date 2024/05/14
  */
 public class FrameworkModel extends ScopeModel {
 
@@ -60,16 +64,34 @@ public class FrameworkModel extends ScopeModel {
     // internal app index is 0, default app index is 1
     private final AtomicLong appIndex = new AtomicLong(0);
 
+    /**
+     * 默认应用程序模型
+     */
     private volatile ApplicationModel defaultAppModel;
 
+    /**
+     * 应用程序模型
+     */
     private final List<ApplicationModel> applicationModels = new CopyOnWriteArrayList<>();
 
+    /**
+     * pub应用程序模型
+     */
     private final List<ApplicationModel> pubApplicationModels = new CopyOnWriteArrayList<>();
 
+    /**
+     * 服务仓库
+     */
     private final FrameworkServiceRepository serviceRepository;
 
+    /**
+     * 内部应用程序模型
+     */
     private final ApplicationModel internalApplicationModel;
 
+    /**
+     * 销毁锁
+     */
     private final ReentrantLock destroyLock = new ReentrantLock();
 
     /**

@@ -27,6 +27,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.URL_MERGE_PROCES
 
 /**
  * The service consumer default configuration
+ * 服务消费者配置
  *
  * @export
  */

@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * 扩展点加载管理器
  * ExtensionDirector is a scoped extension loader manager.
  *
  * <p></p>
@@ -33,7 +34,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ExtensionDirector implements ExtensionAccessor {
 
+    /**
+     * 扩展点加载程序 缓存
+     */
     private final ConcurrentMap<Class<?>, ExtensionLoader<?>> extensionLoadersMap = new ConcurrentHashMap<>(64);
+    /**
+     * 扩展点范围 缓存
+     */
     private final ConcurrentMap<Class<?>, ExtensionScope> extensionScopeMap = new ConcurrentHashMap<>(64);
     private final ExtensionDirector parent;
     private final ExtensionScope scope;
@@ -41,12 +48,24 @@ public class ExtensionDirector implements ExtensionAccessor {
     private final ScopeModel scopeModel;
     private final AtomicBoolean destroyed = new AtomicBoolean();
 
+    /**
+     * 扩展控制器
+     *
+     * @param parent     父母亲
+     * @param scope      范围
+     * @param scopeModel 范围模型
+     */
     public ExtensionDirector(ExtensionDirector parent, ExtensionScope scope, ScopeModel scopeModel) {
         this.parent = parent;
         this.scope = scope;
         this.scopeModel = scopeModel;
     }
 
+    /**
+     * 添加扩展后处理器
+     *
+     * @param processor 加工机
+     */
     public void addExtensionPostProcessor(ExtensionPostProcessor processor) {
         if (!this.extensionPostProcessors.contains(processor)) {
             this.extensionPostProcessors.add(processor);
@@ -62,6 +81,12 @@ public class ExtensionDirector implements ExtensionAccessor {
         return this;
     }
 
+    /**
+     * 获取扩展加载程序
+     *
+     * @param type 类型
+     * @return {@link ExtensionLoader }<{@link T }>
+     */
     @Override
     @SuppressWarnings("unchecked")
     public <T> ExtensionLoader<T> getExtensionLoader(Class<T> type) {

@@ -22,8 +22,9 @@ import org.apache.dubbo.rpc.model.ModuleModel;
 
 /**
  * Extension SPI Scope
- * @see SPI
- * @see ExtensionDirector
+ *
+ * @author huleilei9
+ * @date 2024/05/14
  */
 public enum ExtensionScope {
 

@@ -27,10 +27,10 @@ import static org.apache.dubbo.common.constants.CommonConstants.EXPORT_THREAD_NU
 
 /**
  * The service provider default configuration
+ * 服务提供者配置
  *
- * @export
- * @see org.apache.dubbo.config.ProtocolConfig
- * @see ServiceConfigBase
+ * @author huleilei9
+ * @date 2024/05/14
  */
 public class ProviderConfig extends AbstractServiceConfig {
 

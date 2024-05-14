@@ -38,6 +38,12 @@ import java.util.concurrent.locks.Lock;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CONFIG_UNABLE_DESTROY_MODEL;
 
+/**
+ * 范围模型
+ *
+ * @author huleilei9
+ * @date 2024/05/14
+ */
 public abstract class ScopeModel implements ExtensionAccessor {
     protected static final ErrorTypeAwareLogger LOGGER = LoggerFactory.getErrorTypeAwareLogger(ScopeModel.class);
 
@@ -66,8 +72,12 @@ public abstract class ScopeModel implements ExtensionAccessor {
     private final Set<ClassLoader> classLoaders = new ConcurrentHashSet<>();
 
     private final ScopeModel parent;
+
     private final ExtensionScope scope;
 
+    /**
+     * 扩展控制器
+     */
     private volatile ExtensionDirector extensionDirector;
 
     private volatile ScopeBeanFactory beanFactory;
@@ -76,7 +86,9 @@ public abstract class ScopeModel implements ExtensionAccessor {
     private final List<ScopeClassLoaderListener> classLoaderListeners = new CopyOnWriteArrayList<>();
 
     private final Map<String, Object> attributes = new ConcurrentHashMap<>();
+
     private final AtomicBoolean destroyed = new AtomicBoolean(false);
+
     private final boolean internalScope;
 
     protected final Object instLock = new Object();

@@ -36,17 +36,39 @@ import java.util.concurrent.locks.Lock;
 
 /**
  * Model of a service module
+ * 服务模块模型
+ *
+ * @author huleilei9
+ * @date 2024/05/14
  */
 public class ModuleModel extends ScopeModel {
     private static final Logger logger = LoggerFactory.getLogger(ModuleModel.class);
 
     public static final String NAME = "ModuleModel";
 
+    /**
+     * 应用程序模型
+     */
     private final ApplicationModel applicationModel;
+    /**
+     * 服务仓库
+     */
     private volatile ModuleServiceRepository serviceRepository;
+    /**
+     * 模块环境
+     */
     private volatile ModuleEnvironment moduleEnvironment;
+    /**
+     * 模块 配置管理器
+     */
     private volatile ModuleConfigManager moduleConfigManager;
+    /**
+     * 部署人员
+     */
     private volatile ModuleDeployer deployer;
+    /**
+     * 外部管理生命周期
+     */
     private boolean lifeCycleManagedExternally = false;
 
     protected ModuleModel(ApplicationModel applicationModel) {

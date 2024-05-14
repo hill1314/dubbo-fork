@@ -17,26 +17,60 @@
 package org.apache.dubbo.common.extension;
 
 /**
+ * 提供针对扩展点的统一访问
  * Uniform accessor for extension
+ *
+ * @author huleilei9
+ * @date 2024/05/14
  */
 public interface ExtensionAccessor {
 
+    /**
+     * 获取扩展控制器
+     *
+     * @return {@link ExtensionDirector }
+     */
     ExtensionDirector getExtensionDirector();
 
+    /**
+     * 获取扩展加载程序
+     *
+     * @param type 类型
+     * @return {@link ExtensionLoader }<{@link T }>
+     */
     default <T> ExtensionLoader<T> getExtensionLoader(Class<T> type) {
         return this.getExtensionDirector().getExtensionLoader(type);
     }
 
+    /**
+     * 获取扩展
+     *
+     * @param type 类型
+     * @param name 名称
+     * @return {@link T }
+     */
     default <T> T getExtension(Class<T> type, String name) {
         ExtensionLoader<T> extensionLoader = getExtensionLoader(type);
         return extensionLoader != null ? extensionLoader.getExtension(name) : null;
     }
 
+    /**
+     * 获得自适应扩展
+     *
+     * @param type 类型
+     * @return {@link T }
+     */
     default <T> T getAdaptiveExtension(Class<T> type) {
         ExtensionLoader<T> extensionLoader = getExtensionLoader(type);
         return extensionLoader != null ? extensionLoader.getAdaptiveExtension() : null;
     }
 
+    /**
+     * 获取默认扩展名
+     *
+     * @param type 类型
+     * @return {@link T }
+     */
     default <T> T getDefaultExtension(Class<T> type) {
         ExtensionLoader<T> extensionLoader = getExtensionLoader(type);
         return extensionLoader != null ? extensionLoader.getDefaultExtension() : null;

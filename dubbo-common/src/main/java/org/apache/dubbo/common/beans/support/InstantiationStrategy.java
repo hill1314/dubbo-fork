@@ -29,10 +29,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Interface to create instance for specify type, using both in {@link ExtensionLoader} and {@link ScopeBeanFactory}.
+ * 实例化对象策略，
+ * 可以通过这个类完成扩展点的实例化
+ * Interface to create instance for specify type, using both in {@link ExtensionLoader} and {@link ScopeBeanFactory} .
+ *
+ * @author huleilei9
+ * @date 2024/05/14
  */
 public class InstantiationStrategy {
 
+    /**
+     * 作用域模型访问器
+     */
     private final ScopeModelAccessor scopeModelAccessor;
 
     public InstantiationStrategy() {
@@ -43,6 +51,13 @@ public class InstantiationStrategy {
         this.scopeModelAccessor = scopeModelAccessor;
     }
 
+    /**
+     * 实例化
+     *
+     * @param type 类型
+     * @return {@link T }
+     * @throws ReflectiveOperationException 反射操作异常
+     */
     @SuppressWarnings("unchecked")
     public <T> T instantiate(Class<T> type) throws ReflectiveOperationException {
 
