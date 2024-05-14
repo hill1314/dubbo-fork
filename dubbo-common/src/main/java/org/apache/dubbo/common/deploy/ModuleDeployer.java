@@ -23,15 +23,22 @@ import java.util.concurrent.Future;
 
 /**
  * Export/refer services of module
+ * 模块发布器
+ *
+ * @author huleilei9
+ * @date 2024/05/14
  */
 public interface ModuleDeployer extends Deployer<ModuleModel> {
 
+    @Override
     void initialize() throws IllegalStateException;
 
+    @Override
     Future start() throws IllegalStateException;
 
     Future getStartFuture();
 
+    @Override
     void stop() throws IllegalStateException;
 
     void preDestroy() throws IllegalStateException;

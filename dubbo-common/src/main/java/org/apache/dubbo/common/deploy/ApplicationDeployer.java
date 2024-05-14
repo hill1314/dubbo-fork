@@ -23,24 +23,31 @@ import org.apache.dubbo.rpc.model.ModuleModel;
 import java.util.concurrent.Future;
 
 /**
+ * 应用发布器
  * initialize and start application instance
+ *
+ * @author huleilei9
+ * @date 2024/05/14
  */
 public interface ApplicationDeployer extends Deployer<ApplicationModel> {
 
     /**
      * Initialize the component
      */
+    @Override
     void initialize() throws IllegalStateException;
 
     /**
      * Starts the component.
      * @return
      */
+    @Override
     Future start() throws IllegalStateException;
 
     /**
      * Stops the component.
      */
+    @Override
     void stop() throws IllegalStateException;
 
     Future getStartFuture();

@@ -20,6 +20,12 @@ import org.apache.dubbo.rpc.model.ScopeModel;
 
 import java.util.concurrent.Future;
 
+/**
+ * 发布器
+ *
+ * @author huleilei9
+ * @date 2024/05/14
+ */
 public interface Deployer<E extends ScopeModel> {
 
     /**
