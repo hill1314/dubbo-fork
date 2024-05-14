@@ -287,6 +287,13 @@ public abstract class ScopeModel implements ExtensionAccessor {
         this.internalId = internalId;
     }
 
+    /**
+     * 构建内部层级身份
+     *
+     * @param parentInternalId 父内部id
+     * @param childIndex       子索引
+     * @return {@link String}
+     */
     protected String buildInternalId(String parentInternalId, long childIndex) {
         // FrameworkModel    1
         // ApplicationModel  1.1

@@ -23,7 +23,10 @@ import org.apache.dubbo.rpc.protocol.AbstractExporter;
 import java.util.Map;
 
 /**
- * DubboExporter
+ * dubbo 服务发布
+ *
+ * @author huleilei9
+ * @date 2024/05/14
  */
 public class DubboExporter<T> extends AbstractExporter<T> {
 

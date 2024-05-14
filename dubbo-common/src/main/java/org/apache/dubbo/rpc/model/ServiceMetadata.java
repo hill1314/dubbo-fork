@@ -22,10 +22,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 服务原数据
  * Notice, this class currently has no usage inside Dubbo.
+ * <p>
+ * data related to service level such as name, version, classloader of business service, security info, etc. Also, with
+ * a AttributeMap for extension.
  *
- * data related to service level such as name, version, classloader of business service,
- * security info, etc. Also, with a AttributeMap for extension.
+ * @author huleilei9
+ * @date 2024/05/15
  */
 public class ServiceMetadata extends BaseServiceMetadata {
 

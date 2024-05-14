@@ -99,6 +99,12 @@ public class ApplicationModel extends ScopeModel {
         this(frameworkModel, false);
     }
 
+    /**
+     * 应用程序模型
+     *
+     * @param frameworkModel 框架模型
+     * @param isInternal     是内部
+     */
     protected ApplicationModel(FrameworkModel frameworkModel, boolean isInternal) {
         super(frameworkModel, ExtensionScope.APPLICATION, isInternal);
         synchronized (instLock) {
@@ -108,9 +114,11 @@ public class ApplicationModel extends ScopeModel {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info(getDesc() + " is created");
             }
+            //初始化
             initialize();
 
             this.internalModule = new ModuleModel(this, true);
+            //service级别的内存数据库
             this.serviceRepository = new ServiceRepository(this);
 
             ExtensionLoader<ApplicationInitListener> extensionLoader =
@@ -120,6 +128,7 @@ public class ApplicationModel extends ScopeModel {
                 extensionLoader.getExtension(listenerName).init();
             }
 
+            //初始化应用扩展（包括环境、配置）
             initApplicationExts();
 
             ExtensionLoader<ScopeModelInitializer> initializerExtensionLoader =
@@ -388,7 +397,7 @@ public class ApplicationModel extends ScopeModel {
         return defaultModel().getDefaultModule().getServiceRepository().lookupExportedService(serviceKey);
     }
 
-    /**
+     /**
      * @deprecated ConsumerModel should fetch from context
      */
     @Deprecated

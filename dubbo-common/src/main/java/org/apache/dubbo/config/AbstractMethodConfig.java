@@ -114,6 +114,11 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
         return (ModuleModel) super.getScopeModel();
     }
 
+    /**
+     * 获取默认模型
+     *
+     * @return {@link ScopeModel}
+     */
     @Override
     @Transient
     protected ScopeModel getDefaultModel() {

@@ -33,9 +33,12 @@ import static org.apache.dubbo.common.constants.CommonConstants.SERVICE_EXECUTOR
 import static org.apache.dubbo.common.constants.CommonConstants.SERVICE_FILTER_KEY;
 
 /**
+ * 抽象服务端配置
  * AbstractServiceConfig
  *
+ * @author huleilei9
  * @export
+ * @date 2024/05/15
  */
 public abstract class AbstractServiceConfig extends AbstractInterfaceConfig {
 

@@ -33,9 +33,12 @@ import static org.apache.dubbo.common.constants.RegistryConstants.PROVIDER_NAMES
 import static org.apache.dubbo.common.constants.RegistryConstants.PROVIDER_PORT;
 
 /**
+ * 抽象客户端配置
  * AbstractConsumerConfig
  *
+ * @author huleilei9
  * @export
+ * @date 2024/05/15
  * @see ReferenceConfigBase
  */
 public abstract class AbstractReferenceConfig extends AbstractInterfaceConfig {

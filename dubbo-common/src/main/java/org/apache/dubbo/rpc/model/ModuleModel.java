@@ -75,6 +75,12 @@ public class ModuleModel extends ScopeModel {
         this(applicationModel, false);
     }
 
+    /**
+     * 模块模型
+     *
+     * @param applicationModel 应用程序模型
+     * @param isInternal       是内部
+     */
     protected ModuleModel(ApplicationModel applicationModel, boolean isInternal) {
         super(applicationModel, ExtensionScope.MODULE, isInternal);
         synchronized (instLock) {
@@ -85,6 +91,7 @@ public class ModuleModel extends ScopeModel {
                 LOGGER.info(getDesc() + " is created");
             }
 
+            //初始化
             initialize();
 
             this.serviceRepository = new ModuleServiceRepository(this);

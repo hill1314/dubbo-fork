@@ -22,6 +22,7 @@ import org.apache.dubbo.rpc.model.ModuleModel;
 
 /**
  * Extension SPI Scope
+ * SPI扩展点 作用域
  *
  * @author huleilei9
  * @date 2024/05/14

@@ -649,6 +649,11 @@ public class ExtensionLoader<T> {
         return Collections.unmodifiableSet(new TreeSet<>(classes.keySet()));
     }
 
+    /**
+     * 获取支持扩展实例
+     *
+     * @return {@link Set}<{@link T}>
+     */
     public Set<T> getSupportedExtensionInstances() {
         checkDestroyed();
         List<T> instances = new LinkedList<>();

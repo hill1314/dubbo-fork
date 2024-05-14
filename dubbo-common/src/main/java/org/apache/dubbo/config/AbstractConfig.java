@@ -73,8 +73,11 @@ import static org.apache.dubbo.config.Constants.PARAMETERS;
 
 /**
  * Utility methods and public methods for parsing configuration
+ * 抽象配置类
  *
+ * @author huleilei9
  * @export
+ * @date 2024/05/15
  */
 public abstract class AbstractConfig implements Serializable {
 
@@ -142,6 +145,12 @@ public abstract class AbstractConfig implements Serializable {
         });
     }
 
+    /**
+     * 获取复数标签名称
+     *
+     * @param cls cls
+     * @return {@link String}
+     */
     public static String getPluralTagName(Class<?> cls) {
         String tagName = getTagName(cls);
         if (tagName.endsWith("y")) {
@@ -177,6 +186,14 @@ public abstract class AbstractConfig implements Serializable {
         appendParameters0(parameters, config, prefix, false);
     }
 
+    /**
+     * 附加参数0
+     *
+     * @param parameters   参数
+     * @param config       配置
+     * @param prefix       前缀
+     * @param asParameters 作为参数
+     */
     private static void appendParameters0(
             Map<String, String> parameters, Object config, String prefix, boolean asParameters) {
         if (config == null) {

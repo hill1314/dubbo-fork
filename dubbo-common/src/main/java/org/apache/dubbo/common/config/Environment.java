@@ -77,6 +77,11 @@ public class Environment extends LifecycleAdapter implements ApplicationExt {
         this.scopeModel = scopeModel;
     }
 
+    /**
+     * 初始化
+     *
+     * @throws IllegalStateException 非法状态异常
+     */
     @Override
     public void initialize() throws IllegalStateException {
         if (initialized.compareAndSet(false, true)) {

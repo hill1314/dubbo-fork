@@ -23,13 +23,22 @@ import org.apache.dubbo.rpc.Invoker;
 
 /**
  * AbstractExporter.
+ *
+ * @author huleilei9
+ * @date 2024/05/14
  */
 public abstract class AbstractExporter<T> implements Exporter<T> {
 
     protected final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(getClass());
 
+    /**
+     * 调用程序
+     */
     private final Invoker<T> invoker;
 
+    /**
+     * 未过期
+     */
     private volatile boolean unexported = false;
 
     public AbstractExporter(Invoker<T> invoker) {
@@ -50,6 +59,8 @@ public abstract class AbstractExporter<T> implements Exporter<T> {
         return invoker;
     }
 
+    /**
+     */
     @Override
     public final void unexport() {
         if (unexported) {

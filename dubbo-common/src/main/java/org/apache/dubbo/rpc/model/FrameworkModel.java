@@ -107,19 +107,25 @@ public class FrameworkModel extends ScopeModel {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info(getDesc() + " is created");
                 }
+
+                //初始化
                 initialize();
 
+                //获取当前 framework 里支持的类型
                 TypeDefinitionBuilder.initBuilders(this);
 
+                //定义一个Framework 级别的 内存数据库，用来后续检索
                 serviceRepository = new FrameworkServiceRepository(this);
 
                 ExtensionLoader<ScopeModelInitializer> initializerExtensionLoader =
                         this.getExtensionLoader(ScopeModelInitializer.class);
+
                 Set<ScopeModelInitializer> initializers = initializerExtensionLoader.getSupportedExtensionInstances();
                 for (ScopeModelInitializer initializer : initializers) {
                     initializer.initializeFrameworkModel(this);
                 }
 
+                //创建一个内部的 ApplicationModel
                 internalApplicationModel = new ApplicationModel(this, true);
                 internalApplicationModel
                         .getApplicationConfigManager()
@@ -200,8 +206,11 @@ public class FrameworkModel extends ScopeModel {
      */
     public static FrameworkModel defaultModel() {
         FrameworkModel instance = defaultInstance;
+
+        //双重检查
         if (instance == null) {
             synchronized (globalLock) {
+                //重置默认框架模型
                 resetDefaultFrameworkModel();
                 if (defaultInstance == null) {
                     defaultInstance = new FrameworkModel();
@@ -338,6 +347,9 @@ public class FrameworkModel extends ScopeModel {
         }
     }
 
+    /**
+     * 重置默认框架模型
+     */
     private static void resetDefaultFrameworkModel() {
         synchronized (globalLock) {
             if (defaultInstance != null && !defaultInstance.isDestroyed()) {
