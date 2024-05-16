@@ -20,10 +20,15 @@ import org.apache.dubbo.common.extension.ExtensionScope;
 import org.apache.dubbo.common.extension.SPI;
 
 /**
+ * rest注解解析器
+ * https://cn.dubbo.apache.org/zh-cn/overview/reference/proposals/protocol-http/#rest%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90
  * The interface to resolve the {@link ServiceRestMetadata REST metadata} from the specified
+ * <p>
+ * <p>
  * Dubbo Service interface or type.
  *
- * @since 2.7.6
+ * @author huleilei9
+ * @date 2024/05/16
  */
 @SPI(scope = ExtensionScope.APPLICATION)
 public interface ServiceRestMetadataResolver {

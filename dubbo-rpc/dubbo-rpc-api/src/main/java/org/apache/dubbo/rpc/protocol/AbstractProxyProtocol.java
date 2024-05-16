@@ -104,6 +104,14 @@ public abstract class AbstractProxyProtocol extends AbstractProtocol {
         return exporter;
     }
 
+    /**
+     * 协议绑定引用
+     *
+     * @param type 类型
+     * @param url  url
+     * @return {@link Invoker }<{@link T }>
+     * @throws RpcException RPCException.(API,Prototype,ThreadSafe)
+     */
     @Override
     protected <T> Invoker<T> protocolBindingRefer(final Class<T> type, final URL url) throws RpcException {
         final Invoker<T> target = proxyFactory.getInvoker(doRefer(type, url), type, url);

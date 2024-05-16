@@ -33,9 +33,11 @@ import static org.apache.dubbo.common.constants.RemotingConstants.BACKUP_KEY;
 import static org.apache.dubbo.common.utils.PojoUtils.updatePropertyIfAbsent;
 
 /**
+ * 注册中心配置
  * RegistryConfig
  *
- * @export
+ * @author huleilei9
+ * @date 2024/05/15
  */
 public class RegistryConfig extends AbstractConfig {
 

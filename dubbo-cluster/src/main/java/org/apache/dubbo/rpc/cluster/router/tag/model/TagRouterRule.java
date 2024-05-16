@@ -33,6 +33,8 @@ import static org.apache.dubbo.rpc.cluster.Constants.RULE_VERSION_V30;
 import static org.apache.dubbo.rpc.cluster.Constants.TAGS_KEY;
 
 /**
+ * 标签路由规则
+ *
  * %YAML1.2
  * ---
  * force: true
@@ -50,7 +52,13 @@ import static org.apache.dubbo.rpc.cluster.Constants.TAGS_KEY;
 public class TagRouterRule extends AbstractRouterRule {
     private List<Tag> tags;
 
+    /**
+     * 标签到地址
+     */
     private final Map<String, Set<String>> addressToTagnames = new HashMap<>();
+    /**
+     * 地址到标签
+     */
     private final Map<String, Set<String>> tagnameToAddresses = new HashMap<>();
 
     @SuppressWarnings("unchecked")

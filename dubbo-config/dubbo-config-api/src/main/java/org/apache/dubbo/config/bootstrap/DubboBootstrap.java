@@ -100,7 +100,7 @@ public final class DubboBootstrap {
     private final ApplicationModel applicationModel;
 
     private final ConfigManager configManager;
-
+    //应用发布器
     private final ApplicationDeployer applicationDeployer;
 
     /**

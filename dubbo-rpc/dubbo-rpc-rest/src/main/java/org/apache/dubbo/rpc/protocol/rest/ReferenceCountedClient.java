@@ -27,6 +27,12 @@ import java.util.concurrent.ConcurrentMap;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.PROTOCOL_ERROR_CLOSE_CLIENT;
 
+/**
+ * 引用计数客户端
+ *
+ * @author huleilei9
+ * @date 2024/05/16
+ */
 public class ReferenceCountedClient<T extends RestClient> extends ReferenceCountedResource {
     private static final ErrorTypeAwareLogger logger =
             LoggerFactory.getErrorTypeAwareLogger(ReferenceCountedClient.class);

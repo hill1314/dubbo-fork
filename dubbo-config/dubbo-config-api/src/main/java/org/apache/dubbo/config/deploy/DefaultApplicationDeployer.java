@@ -129,6 +129,9 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     private volatile boolean hasPreparedInternalModule = false;
 
     private ScheduledFuture<?> asyncMetadataFuture;
+    /**
+     * 服务启动 异步任务
+     */
     private volatile CompletableFuture<Boolean> startFuture;
     private final DubboShutdownHook dubboShutdownHook;
 

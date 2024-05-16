@@ -20,7 +20,11 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 
 /**
+ * 方法参数信息
  * description of service method args info
+ *
+ * @author huleilei9
+ * @date 2024/05/16
  */
 public class ArgInfo {
     /**

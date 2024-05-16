@@ -35,18 +35,29 @@ import static org.apache.dubbo.common.utils.StringUtils.SLASH;
 import static org.apache.dubbo.common.utils.StringUtils.isBlank;
 
 /**
+ * 请求元信息
  * The metadata class for REST request
  *
- * @since 2.7.6
+ * @author huleilei9
+ * @date 2024/05/16
  */
 public class RequestMetadata implements Serializable {
 
     private static final long serialVersionUID = -240099840085329958L;
 
+    /**
+     * 方法
+     */
     private String method;
 
+    /**
+     * 请求url
+     */
     private String path;
 
+    /**
+     * param参数?拼接
+     */
     private Map<String, List<String>> params = new LinkedHashMap<>();
 
     private Map<String, List<String>> headers = new LinkedHashMap<>();

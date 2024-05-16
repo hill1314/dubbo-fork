@@ -65,6 +65,12 @@ import static org.apache.dubbo.common.constants.LoggerCodeConstants.COMMON_PROPE
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.COMMON_UNEXPECTED_EXCEPTION;
 import static org.apache.dubbo.config.AbstractConfig.getTagName;
 
+/**
+ * 抽象配置管理器
+ *
+ * @author huleilei9
+ * @date 2024/05/15
+ */
 public abstract class AbstractConfigManager extends LifecycleAdapter {
 
     private static final String CONFIG_NAME_READ_METHOD = "getName";

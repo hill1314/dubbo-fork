@@ -114,7 +114,7 @@ public class RestProtocol extends AbstractProtocol {
 
     @Override
     protected <T> Invoker<T> protocolBindingRefer(final Class<T> type, final URL url) throws RpcException {
-
+        // restClient spi创建
         ReferenceCountedClient<? extends RestClient> refClient = clients.get(url.getAddress());
         if (refClient == null || refClient.isDestroyed()) {
             synchronized (clients) {

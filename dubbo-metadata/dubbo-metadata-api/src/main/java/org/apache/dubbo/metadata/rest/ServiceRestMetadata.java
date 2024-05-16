@@ -27,10 +27,30 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
+ * 服务请求元信息
  * The metadata class for {@link RequestMetadata HTTP(REST) request} and
+ * <p>
+ *
+ *  dubbo http(header)
+ *  **********************************************
+ * // service key header
+ * path: com.demo.TestInterface
+ * group: demo
+ * port: 80
+ * version: 1.0.0
+ *
+ * // 保证长连接
+ * Keep-Alive,Connection: keep-alive
+ * Keep-alive: 60
+ *
+ * // RPCContext Attachment
+ * userId: 123456
+ *  **********************************************
+ * <p>
  * its binding Dubbo service metadata
  *
- * @since 2.7.6
+ * @author huleilei9
+ * @date 2024/05/16
  */
 public class ServiceRestMetadata implements Serializable {
 
@@ -42,10 +62,19 @@ public class ServiceRestMetadata implements Serializable {
 
     private String group;
 
+    /**
+     * method 元信息
+     */
     private Set<RestMethodMetadata> meta;
 
+    /**
+     * 端口 for provider service key
+     */
     private Integer port;
 
+    /**
+     * consumer 标志
+     */
     private boolean consumer;
 
     private String contextPathFromUrl;

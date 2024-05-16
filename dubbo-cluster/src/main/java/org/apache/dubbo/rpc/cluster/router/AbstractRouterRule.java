@@ -30,7 +30,10 @@ import static org.apache.dubbo.rpc.cluster.Constants.SCOPE_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.VALID_KEY;
 
 /**
- * TODO Extract more code here if necessary
+ * 流量管控-路由规则
+ *
+ * @author huleilei9
+ * @date 2024/05/16
  */
 public abstract class AbstractRouterRule {
     private String rawRule;

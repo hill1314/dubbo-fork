@@ -24,7 +24,16 @@ import java.util.stream.Collectors;
 
 import static org.apache.dubbo.rpc.cluster.Constants.CONDITIONS_KEY;
 
+/**
+ * 条件路由器规则
+ *
+ * @author huleilei9
+ * @date 2024/05/16
+ */
 public class ConditionRouterRule extends AbstractRouterRule {
+    /**
+     * 条件
+     */
     private List<String> conditions;
 
     @SuppressWarnings("unchecked")

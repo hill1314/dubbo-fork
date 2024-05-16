@@ -30,17 +30,27 @@ import java.util.Objects;
 import static java.util.Collections.emptyList;
 
 /**
+ * 方法元信息
  * The metadata class for {@link RequestMetadata HTTP(REST) request} and
+ * <p>
+ * <p>
  * its binding {@link MethodDefinition method definition}
  *
- * @since 2.7.6
+ * @author huleilei9
+ * @date 2024/05/16
  */
 public class RestMethodMetadata implements Serializable {
 
     private static final long serialVersionUID = 2935252016200830694L;
 
+    /**
+     * method 定义信息（name ,pramType,returnType）
+     */
     private MethodDefinition method;
 
+    /**
+     * 请求元信息
+     */
     private RequestMetadata request;
 
     private Integer urlIndex;

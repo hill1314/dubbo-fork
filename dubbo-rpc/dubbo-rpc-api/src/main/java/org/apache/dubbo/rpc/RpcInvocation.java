@@ -53,7 +53,8 @@ import static org.apache.dubbo.rpc.Constants.TOKEN_KEY;
 /**
  * RPC Invocation.
  *
- * @serial Don't change the class name and properties.
+ * @author huleilei9
+ * @date 2024/05/16
  */
 public class RpcInvocation implements Invocation, Serializable {
 
@@ -76,12 +77,14 @@ public class RpcInvocation implements Invocation, Serializable {
 
     /**
      * Passed to the remote server during RPC call
+     * 在 RPC调用期间 传递到远程服务器
      */
     private Map<String, Object> attachments;
 
     private final transient Lock attachmentLock = new ReentrantLock();
 
     /**
+     * 仅用于调用方
      * Only used on the caller side, will not appear on the wire.
      */
     private transient Map<Object, Object> attributes = Collections.synchronizedMap(new HashMap<>());
