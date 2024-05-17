@@ -220,17 +220,22 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
             // register shutdown hook
             registerShutdownHook();
 
+            //配置中心
             startConfigCenter();
 
+            //加载应用配置
             loadApplicationConfigs();
 
+            //moduleModel 初始化
             initModuleDeployers();
 
+            //初始化指标报告器
             initMetricsReporter();
 
             initMetricsService();
 
             // @since 2.7.8
+            //启动元数据中心
             startMetadataCenter();
 
             initialized = true;
@@ -651,6 +656,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
 
     /**
      * Start the bootstrap
+     * 应用模型启动
      *
      * @return
      */
@@ -684,8 +690,10 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
                 // started -> starting : re-start app
                 onStarting();
 
+                //应用模型 初始化
                 initialize();
 
+                //调用模块模型启动
                 doStart();
             } catch (Throwable e) {
                 onFailed(getIdentifier() + " start failure", e);
@@ -714,32 +722,6 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
 
     private void doStart() {
         startModules();
-
-        // prepare application instance
-        //        prepareApplicationInstance();
-
-        // Ignore checking new module after start
-        //        executorRepository.getSharedExecutor().submit(() -> {
-        //            try {
-        //                while (isStarting()) {
-        //                    // notify when any module state changed
-        //                    synchronized (stateLock) {
-        //                        try {
-        //                            stateLock.wait(500);
-        //                        } catch (InterruptedException e) {
-        //                            // ignore
-        //                        }
-        //                    }
-        //
-        //                    // if has new module, do start again
-        //                    if (hasPendingModule()) {
-        //                        startModules();
-        //                    }
-        //                }
-        //            } catch (Throwable e) {
-        //                onFailed(getIdentifier() + " check start occurred an exception", e);
-        //            }
-        //        });
     }
 
     private void startModules() {
@@ -749,6 +731,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
         // filter and start pending modules, ignore new module during starting, throw exception of module start
         for (ModuleModel moduleModel : applicationModel.getModuleModels()) {
             if (moduleModel.getDeployer().isPending()) {
+                //DefaultModuleDeployer 启动
                 moduleModel.getDeployer().start();
             }
         }

@@ -45,6 +45,7 @@ public interface Deployer<E extends ScopeModel> {
     void stop() throws IllegalStateException;
 
     /**
+     * 等待启动
      * @return true if the component is added and waiting to start
      */
     boolean isPending();

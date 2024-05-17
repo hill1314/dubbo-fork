@@ -67,6 +67,7 @@ import java.util.function.Consumer;
 import static java.util.Collections.singletonList;
 
 /**
+ * dubbo 启动器
  * See {@link ApplicationModel} and {@link ExtensionLoader} for why this class is designed to be singleton.
  * <p>
  * The bootstrap class of Dubbo
@@ -83,6 +84,9 @@ public final class DubboBootstrap {
     private static final Logger logger = LoggerFactory.getLogger(DubboBootstrap.class);
 
     private static final ConcurrentMap<ApplicationModel, DubboBootstrap> instanceMap = new ConcurrentHashMap<>();
+    /**
+     *
+     */
     private static volatile DubboBootstrap instance;
 
     private final AtomicBoolean awaited = new AtomicBoolean(false);
@@ -100,7 +104,9 @@ public final class DubboBootstrap {
     private final ApplicationModel applicationModel;
 
     private final ConfigManager configManager;
-    //应用发布器
+    /**
+     * 应用发布器
+     */
     private final ApplicationDeployer applicationDeployer;
 
     /**
@@ -221,12 +227,14 @@ public final class DubboBootstrap {
     }
 
     /**
+     * todo 启动dubbo应用
      * Start dubbo application
      *
      * @param wait If true, wait for startup to complete, or else no waiting.
      * @return
      */
     public DubboBootstrap start(boolean wait) {
+        //部署启动
         Future future = applicationDeployer.start();
         if (wait) {
             try {

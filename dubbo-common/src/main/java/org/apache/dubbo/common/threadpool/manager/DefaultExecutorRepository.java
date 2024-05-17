@@ -291,6 +291,11 @@ public class DefaultExecutorRepository implements ExecutorRepository, ExtensionA
         }
     }
 
+    /**
+     * 用于发布服务的线程池
+     *
+     * @return {@link ScheduledExecutorService }
+     */
     @Override
     public ScheduledExecutorService getServiceExportExecutor() {
         synchronized (LOCK) {

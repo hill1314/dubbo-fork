@@ -30,19 +30,25 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 /**
+ * 线程本地上下文-用于传递RPC上下文信息
+ *
  * Thread local context. (API, ThreadLocal, ThreadSafe)
  * <p>
  * Note: RpcContext is a temporary state holder. States in RpcContext changes every time when request is sent or received.
  * <p/>
  * There are four kinds of RpcContext, which are ServerContext, ClientAttachment, ServerAttachment and ServiceContext.
  * <p/>
- * ServiceContext: Using to pass environment parameters in the whole invocation. For example, `remotingApplicationName`,
+ *
+ * 1. ServiceContext: Using to pass environment parameters in the whole invocation. For example, `remotingApplicationName`,
  * `remoteAddress`, etc. {@link RpcServiceContext}
- * ClientAttachment, ServerAttachment and ServiceContext are using to transfer attachments.
+ *
+ * 2. ClientAttachment, ServerAttachment and ServiceContext are using to transfer attachments.
  * Imaging a situation like this, A is calling B, and B will call C, after that, B wants to return some attachments back to A.
- * ClientAttachment is using to pass attachments to next hop as a consumer. ( A --> B , in A side)
- * ServerAttachment is using to fetch attachments from previous hop as a provider. ( A --> B , in B side)
- * ServerContext is using to return some attachments back to client as a provider. ( A <-- B , in B side)
+ *  ClientAttachment is using to pass attachments to next hop as a consumer. ( A --> B , in A side)
+ *
+ * 3. ServerAttachment is using to fetch attachments from previous hop as a provider. ( A --> B , in B side)
+ *
+ * 4. ServerContext is using to return some attachments back to client as a provider. ( A <-- B , in B side)
  * The reason why using `ServiceContext` is to make API compatible with previous.
  *
  * @export
@@ -63,6 +69,9 @@ public class RpcContext {
                 }
             };
 
+    /**
+     * 服务器响应本地
+     */
     private static final InternalThreadLocal<RpcContextAttachment> SERVER_RESPONSE_LOCAL =
             new InternalThreadLocal<RpcContextAttachment>() {
                 @Override
@@ -71,6 +80,9 @@ public class RpcContext {
                 }
             };
 
+    /**
+     * 客户端附件
+     */
     private static final InternalThreadLocal<RpcContextAttachment> CLIENT_ATTACHMENT =
             new InternalThreadLocal<RpcContextAttachment>() {
                 @Override
@@ -79,6 +91,9 @@ public class RpcContext {
                 }
             };
 
+    /**
+     * 服务器附件
+     */
     private static final InternalThreadLocal<RpcContextAttachment> SERVER_ATTACHMENT =
             new InternalThreadLocal<RpcContextAttachment>() {
                 @Override
@@ -87,6 +102,9 @@ public class RpcContext {
                 }
             };
 
+    /**
+     * 服务上下文
+     */
     private static final InternalThreadLocal<RpcServiceContext> SERVICE_CONTEXT =
             new InternalThreadLocal<RpcServiceContext>() {
                 @Override

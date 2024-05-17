@@ -120,7 +120,7 @@ import static org.apache.dubbo.rpc.cluster.Constants.EXPORT_KEY;
 import static org.apache.dubbo.rpc.support.ProtocolUtils.isGeneric;
 
 /**
- * 服务端配置
+ * 服务端配置信息
  *
  * @author huleilei9
  * @date 2024/05/14
@@ -136,6 +136,9 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
      */
     private static final Map<String, Integer> RANDOM_PORT_MAP = new HashMap<String, Integer>();
 
+    /**
+     * 协议spi
+     */
     private Protocol protocolSPI;
 
     /**
@@ -144,6 +147,9 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
      */
     private ProxyFactory proxyFactory;
 
+    /**
+     * 提供者模型
+     */
     private ProviderModel providerModel;
 
     /**
@@ -309,6 +315,11 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         serviceMetadata.generateServiceKey();
     }
 
+    /**
+     * 真正实现 服务发布
+     *
+     * @param registerType
+     */
     @Override
     public void export(RegisterTypeEnum registerType) {
         if (this.exported) {
@@ -335,7 +346,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                 this.init();
 
                 if (shouldDelay()) {
-                    // should register if delay export
+                    // should register if delay export 延迟发布
                     doDelayExport();
                 } else if (Integer.valueOf(-1).equals(getDelay())
                         && Boolean.parseBoolean(ConfigurationUtils.getProperty(
@@ -532,6 +543,11 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         checkAndUpdateSubConfigs();
     }
 
+    /**
+     * 进行服务发布
+     *
+     * @param registerType 寄存器类型
+     */
     protected synchronized void doExport(RegisterTypeEnum registerType) {
         if (unexported) {
             throw new IllegalStateException("The service " + interfaceClass.getName() + " has already unexported!");
@@ -543,10 +559,16 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         if (StringUtils.isEmpty(path)) {
             path = interfaceName;
         }
+        //
         doExportUrls(registerType);
         exported();
     }
 
+    /**
+     * 发布URL
+     *
+     * @param registerType 寄存器类型
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrls(RegisterTypeEnum registerType) {
         ModuleServiceRepository repository = getScopeModel().getServiceRepository();
@@ -558,10 +580,13 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                 // for stub service, path always interface name or IDL package name
                 this.path = serviceDescriptor.getInterfaceName();
             }
+
+            //注册服务
             repository.registerService(serviceDescriptor);
         } else {
             serviceDescriptor = repository.registerService(getInterfaceClass());
         }
+
         providerModel = new ProviderModel(
                 serviceMetadata.getServiceKey(),
                 ref,
@@ -576,8 +601,10 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         providerModel.setDestroyRunner(getDestroyRunner());
         repository.registerProvider(providerModel);
 
+        //获取注册中心地址
         List<URL> registryURLs = ConfigValidationUtils.loadRegistries(this, true);
 
+        //多协议发布
         for (ProtocolConfig protocolConfig : protocols) {
             String pathKey = URL.buildKey(
                     getContextPath(protocolConfig).map(p -> p + "/" + path).orElse(path), group, version);
@@ -586,14 +613,22 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                 // In case user specified path, register service one more time to map it to path.
                 repository.registerService(pathKey, interfaceClass);
             }
+
+            //发布服务URL
             doExportUrlsFor1Protocol(protocolConfig, registryURLs, registerType);
         }
 
         providerModel.setServiceUrls(urls);
     }
 
-    private void doExportUrlsFor1Protocol(
-            ProtocolConfig protocolConfig, List<URL> registryURLs, RegisterTypeEnum registerType) {
+    /**
+     * 为指定协议 发布URL
+     *
+     * @param protocolConfig
+     * @param registryURLs
+     * @param registerType   寄存器类型
+     */
+    private void doExportUrlsFor1Protocol(ProtocolConfig protocolConfig, List<URL> registryURLs, RegisterTypeEnum registerType) {
         Map<String, String> map = buildAttributes(protocolConfig);
 
         // remove null key and null value
@@ -601,12 +636,16 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         // init serviceMetadata attachments
         serviceMetadata.getAttachments().putAll(map);
 
+        //服务URL
         URL url = buildUrl(protocolConfig, map);
 
+        //流程服务执行器
         processServiceExecutor(url);
 
+        //发布服务URL
         exportUrl(url, registryURLs, registerType);
 
+        //初始化 服务方法指标
         initServiceMethodMetrics(url);
     }
 
@@ -633,6 +672,11 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         });
     }
 
+    /**
+     * 流程服务执行器
+     *
+     * @param url url
+     */
     private void processServiceExecutor(URL url) {
         if (getExecutor() != null) {
             String mode = application.getExecutorManagementMode();
@@ -650,6 +694,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
              * Because executor is not a string type, it cannot be attached to the url parameter, so it is added to URL#attributes
              * and obtained it in IsolationExecutorRepository#createExecutor method
              */
+            //由于executor不是字符串类型，无法附加在url参数上，所以添加到URL#attributes中，并在IsolationExecutorRepository#createExecutor方法中获取
             providerModel.getServiceMetadata().addAttribute(SERVICE_EXECUTOR, getExecutor());
             url.getAttributes().put(SERVICE_EXECUTOR, getExecutor());
         }
@@ -796,13 +841,21 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         }
     }
 
+    /**
+     * 生成url
+     *
+     * @param protocolConfig 协议配置
+     * @param params         params
+     * @return {@link URL }
+     */
     private URL buildUrl(ProtocolConfig protocolConfig, Map<String, String> params) {
+        //协议名称
         String name = protocolConfig.getName();
         if (StringUtils.isEmpty(name)) {
             name = DUBBO;
         }
 
-        // export service
+        // export service 发布服务
         String host = findConfiguredHosts(protocolConfig, provider, params);
         if (NetUtils.isIPV6URLStdFormat(host)) {
             if (!host.contains("[")) {
@@ -813,6 +866,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
             params.put(CommonConstants.IPV6_KEY, ipv6Host);
         }
 
+        //端口
         Integer port =
                 findConfiguredPort(protocolConfig, provider, this.getExtensionLoader(Protocol.class), name, params);
         URL url = new ServiceConfigURL(

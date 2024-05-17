@@ -616,6 +616,9 @@ public interface CommonConstants {
 
     String EXECUTOR_MANAGEMENT_MODE = "executor-management-mode";
     String EXECUTOR_MANAGEMENT_MODE_DEFAULT = "default";
+    /**
+     * 执行器管理模式隔离
+     */
     String EXECUTOR_MANAGEMENT_MODE_ISOLATION = "isolation";
 
     /**

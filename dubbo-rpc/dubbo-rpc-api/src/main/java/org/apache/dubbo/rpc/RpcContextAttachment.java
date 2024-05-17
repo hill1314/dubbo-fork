@@ -22,6 +22,12 @@ import org.apache.dubbo.common.utils.CollectionUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * rpc上下文
+ *
+ * @author huleilei9
+ * @date 2024/05/16
+ */
 public class RpcContextAttachment extends RpcContext {
     protected volatile Map<String, Object> attachments = new HashMap<>();
     // only useful on provider side.

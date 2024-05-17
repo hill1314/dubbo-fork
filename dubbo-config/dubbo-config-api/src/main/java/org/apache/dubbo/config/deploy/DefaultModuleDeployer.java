@@ -62,6 +62,9 @@ import static org.apache.dubbo.common.constants.LoggerCodeConstants.CONFIG_UNABL
 
 /**
  * Export/refer services of module
+ *
+ * @author huleilei9
+ * @date 2024/05/17
  */
 public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> implements ModuleDeployer {
 
@@ -79,11 +82,18 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
     private final FrameworkExecutorRepository frameworkExecutorRepository;
     private final ExecutorRepository executorRepository;
 
+    /**
+     * 配置管理器
+     */
     private final ModuleConfigManager configManager;
 
     private final SimpleReferenceCache referenceCache;
 
+    /**
+     * 应用程序部署程序
+     */
     private final ApplicationDeployer applicationDeployer;
+
     private CompletableFuture startFuture;
     private Boolean background;
     private Boolean exportAsync;
@@ -112,6 +122,11 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
         }
     }
 
+    /**
+     * 初始化
+     *
+     * @throws IllegalStateException 非法状态异常
+     */
     @Override
     public void initialize() throws IllegalStateException {
         if (initialized) {
@@ -124,6 +139,7 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
             }
             onInitialize();
 
+            //加载模块配置
             loadConfigs();
 
             // read ModuleConfig
@@ -148,14 +164,27 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
         }
     }
 
+    /**
+     * 启动服务
+     *
+     * @return {@link Future }
+     * @throws IllegalStateException 非法状态异常
+     */
     @Override
     public Future start() throws IllegalStateException {
         // initialize，maybe deadlock applicationDeployer lock & moduleDeployer lock
+        //再次调用 应用模型 初始化
         applicationDeployer.initialize();
 
         return startSync();
     }
 
+    /**
+     * 启动服务
+     *
+     * @return {@link Future }
+     * @throws IllegalStateException 非法状态异常
+     */
     private synchronized Future startSync() throws IllegalStateException {
         if (isStopping() || isStopped() || isFailed()) {
             throw new IllegalStateException(getIdentifier() + " is stopping or stopped, can not start again");
@@ -168,9 +197,10 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
 
             onModuleStarting();
 
+            //模块模型初始化
             initialize();
 
-            // export services
+            // 发布服务
             exportServices();
 
             // prepare application instance
@@ -419,6 +449,9 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
         moduleModel.getConfigManager().refreshAll();
     }
 
+    /**
+     * 发布服务
+     */
     private void exportServices() {
         for (ServiceConfigBase sc : configManager.getServices()) {
             exportServiceInternal(sc);
@@ -442,6 +475,11 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
         }
     }
 
+    /**
+     * 发布服务
+     *
+     * @param sc sc
+     */
     private void exportServiceInternal(ServiceConfigBase sc) {
         ServiceConfig<?> serviceConfig = (ServiceConfig<?>) sc;
         if (!serviceConfig.isRefreshed()) {
@@ -456,7 +494,9 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
                     () -> {
                         try {
                             if (!sc.isExported()) {
+                                //发布服务
                                 sc.export();
+
                                 exportedServices.add(sc);
                             }
                         } catch (Throwable t) {

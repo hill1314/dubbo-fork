@@ -25,18 +25,39 @@ import java.util.Objects;
 import java.util.Set;
 
 public class ServiceModel {
+    /**
+     * 服务key
+     */
     private String serviceKey;
+    /**
+     * 代理对象
+     */
     private Object proxyObject;
+    /**
+     *
+     */
     private Runnable destroyRunner;
+    /**
+     * 类加载器
+     */
     private ClassLoader classLoader;
 
     private final ClassLoader interfaceClassLoader;
 
     private final ModuleModel moduleModel;
+    /**
+     * 服务模型
+     */
     private final ServiceDescriptor serviceModel;
 
+    /**
+     * 配置
+     */
     private AbstractInterfaceConfig config;
 
+    /**
+     * 服务元数据
+     */
     private final ServiceMetadata serviceMetadata;
 
     public ServiceModel(

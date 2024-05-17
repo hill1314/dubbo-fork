@@ -193,6 +193,13 @@ public class ConfigValidationUtils {
 
     public static final String IPV6_END_MARK = "]";
 
+    /**
+     * 加载注册中心地址
+     *
+     * @param interfaceConfig 接口配置
+     * @param provider        供应商
+     * @return {@link List }<{@link URL }>
+     */
     public static List<URL> loadRegistries(AbstractInterfaceConfig interfaceConfig, boolean provider) {
         // check && override if necessary
         List<URL> registryList = new ArrayList<>();

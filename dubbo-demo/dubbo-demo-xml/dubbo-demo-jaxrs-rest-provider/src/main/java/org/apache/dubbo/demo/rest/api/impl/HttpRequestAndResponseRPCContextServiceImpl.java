@@ -27,6 +27,12 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+/**
+ * http请求和响应 RPC上下文 服务实现
+ *
+ * @author huleilei9
+ * @date 2024/05/16
+ */
 @Service("httpRequestAndResponseRPCContextService")
 public class HttpRequestAndResponseRPCContextServiceImpl implements HttpRequestAndResponseRPCContextService {
     @Override
