@@ -69,6 +69,9 @@ public abstract class AbstractProtocol implements Protocol, ScopeModelAware {
 
     protected FrameworkModel frameworkModel;
 
+    /**
+     * 优化器
+     */
     private final Set<String> optimizers = new ConcurrentHashSet<>();
 
     @Override
@@ -148,6 +151,12 @@ public abstract class AbstractProtocol implements Protocol, ScopeModelAware {
         return Collections.unmodifiableCollection(exporterMap.values());
     }
 
+    /**
+     * 优化序列化
+     *
+     * @param url url
+     * @throws RpcException RPCException.(API,Prototype,ThreadSafe)
+     */
     protected void optimizeSerialization(URL url) throws RpcException {
         String className = url.getParameter(OPTIMIZER_KEY, "");
         if (StringUtils.isEmpty(className) || optimizers.contains(className)) {
@@ -163,6 +172,7 @@ public abstract class AbstractProtocol implements Protocol, ScopeModelAware {
                         + SerializationOptimizer.class.getName());
             }
 
+            //序列化器
             SerializationOptimizer optimizer = (SerializationOptimizer) clazz.newInstance();
 
             if (optimizer.getSerializableClasses() == null) {

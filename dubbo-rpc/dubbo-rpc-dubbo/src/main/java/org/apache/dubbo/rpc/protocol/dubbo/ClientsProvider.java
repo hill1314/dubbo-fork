@@ -20,6 +20,12 @@ import org.apache.dubbo.remoting.exchange.ExchangeClient;
 
 import java.util.List;
 
+/**
+ * 客户端提供程序
+ *
+ * @author huleilei9
+ * @date 2024/05/17
+ */
 public interface ClientsProvider {
     List<? extends ExchangeClient> getClients();
 

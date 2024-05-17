@@ -141,6 +141,7 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
 
     /**
      * The invoker of the reference service
+     * 服务调用者
      */
     private transient volatile Invoker<?> invoker;
 
@@ -482,7 +483,7 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
             aggregateUrlFromRegistry(referenceParameters);
         }
 
-        //
+        //创建反射调用, invoker
         createInvoker();
 
         if (logger.isInfoEnabled()) {
@@ -644,11 +645,15 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
     private void createInvoker() {
         if (urls.size() == 1) {
             URL curUrl = urls.get(0);
+            //协议对应的反射调用
             invoker = protocolSPI.refer(interfaceClass, curUrl);
+
             // registry url, mesh-enable and unloadClusterRelated is true, not need Cluster.
             if (!UrlUtils.isRegistry(curUrl) && !curUrl.getParameter(UNLOAD_CLUSTER_RELATED, false)) {
                 List<Invoker<?>> invokers = new ArrayList<>();
                 invokers.add(invoker);
+
+                // 集群容错策略
                 invoker = Cluster.getCluster(getScopeModel(), Cluster.DEFAULT)
                         .join(new StaticDirectory(curUrl, invokers), true);
             }
@@ -680,8 +685,7 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
                 if (CollectionUtils.isEmpty(invokers)) {
                     throw new IllegalArgumentException("invokers == null");
                 }
-                URL curUrl = invokers.get(0)
-                        .getUrl();
+                URL curUrl = invokers.get(0).getUrl();
                 String cluster = curUrl.getParameter(CLUSTER_KEY, Cluster.DEFAULT);
                 invoker = Cluster.getCluster(getScopeModel(), cluster)
                         .join(new StaticDirectory(curUrl, invokers), true);
@@ -689,6 +693,12 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
         }
     }
 
+    /**
+     * 检查可用调用程序
+     *
+     * @param timeout 超时
+     * @throws IllegalStateException 非法状态异常
+     */
     private void checkInvokerAvailable(long timeout) throws IllegalStateException {
         if (!shouldCheck()) {
             return;

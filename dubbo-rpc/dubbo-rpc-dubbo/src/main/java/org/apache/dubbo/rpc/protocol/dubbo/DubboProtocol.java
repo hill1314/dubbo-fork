@@ -437,18 +437,33 @@ public class DubboProtocol extends AbstractProtocol {
         return protocolBindingRefer(type, url);
     }
 
+    /**
+     * 协议绑定引用
+     *
+     * @param serviceType 服务类型
+     * @param url         url
+     * @return {@link Invoker }<{@link T }>
+     * @throws RpcException RPCException.(API,Prototype,ThreadSafe)
+     */
     @Override
     public <T> Invoker<T> protocolBindingRefer(Class<T> serviceType, URL url) throws RpcException {
         checkDestroyed();
+        //序列化
         optimizeSerialization(url);
 
-        // create rpc invoker.
+        // create rpc invoker. 客户端PRC反射
         DubboInvoker<T> invoker = new DubboInvoker<T>(serviceType, url, getClients(url), invokers);
         invokers.add(invoker);
 
         return invoker;
     }
 
+    /**
+     * 获取客户端
+     *
+     * @param url url
+     * @return {@link ClientsProvider }
+     */
     private ClientsProvider getClients(URL url) {
         int connections = url.getParameter(CONNECTIONS_KEY, 0);
         // whether to share connection

@@ -24,6 +24,12 @@ import java.util.List;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.PROTOCOL_ERROR_CLOSE_CLIENT;
 
+/**
+ * 独占客户端提供程序
+ *
+ * @author huleilei9
+ * @date 2024/05/17
+ */
 public class ExclusiveClientsProvider implements ClientsProvider {
     private static final ErrorTypeAwareLogger logger =
             LoggerFactory.getErrorTypeAwareLogger(ExclusiveClientsProvider.class);
