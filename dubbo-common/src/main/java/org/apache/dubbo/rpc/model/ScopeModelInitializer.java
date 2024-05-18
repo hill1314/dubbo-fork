@@ -19,6 +19,12 @@ package org.apache.dubbo.rpc.model;
 import org.apache.dubbo.common.extension.ExtensionScope;
 import org.apache.dubbo.common.extension.SPI;
 
+/**
+ * 范围模型 初始化器
+ *
+ * @author huleilei9
+ * @date 2024/05/17
+ */
 @SPI(scope = ExtensionScope.SELF)
 public interface ScopeModelInitializer {
 

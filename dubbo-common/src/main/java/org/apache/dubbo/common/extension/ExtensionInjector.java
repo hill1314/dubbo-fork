@@ -17,7 +17,13 @@
 package org.apache.dubbo.common.extension;
 
 /**
+ * 为SPI扩展提供 依赖注入
  * An injector to provide resources for SPI extension.
+ *
+ * 针对不同的注入范围，有四种实现
+ *
+ * @author huleilei9
+ * @date 2024/05/18
  */
 @SPI(scope = ExtensionScope.SELF)
 public interface ExtensionInjector extends ExtensionAccessorAware {

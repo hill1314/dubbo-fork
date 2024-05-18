@@ -27,11 +27,14 @@ import org.apache.dubbo.rpc.cluster.loadbalance.RandomLoadBalance;
 import java.util.List;
 
 /**
+ * 负载均衡算法接口
  * LoadBalance. (SPI, Singleton, ThreadSafe)
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Load_balancing_(computing)">Load-Balancing</a>
  *
- * @see org.apache.dubbo.rpc.cluster.Cluster#join(Directory)
+ * @author huleilei9
+ * @date 2024/05/18
+ * @see Cluster#join(Directory)
  */
 @SPI(RandomLoadBalance.NAME)
 public interface LoadBalance {
@@ -39,7 +42,7 @@ public interface LoadBalance {
     /**
      * select one invoker in list.
      *
-     * @param invokers   invokers.
+     * @param invokers   invokers. 所有服务提供方的客户端代理
      * @param url        refer url
      * @param invocation invocation.
      * @return selected invoker.

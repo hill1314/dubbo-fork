@@ -89,6 +89,9 @@ public abstract class ScopeModel implements ExtensionAccessor {
 
     private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
+    /**
+     * 内部作用域
+     */
     private final boolean internalScope;
 
     protected final Object instLock = new Object();
