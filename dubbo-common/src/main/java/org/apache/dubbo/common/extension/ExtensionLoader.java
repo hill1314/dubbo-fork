@@ -216,6 +216,7 @@ public class ExtensionLoader<T> {
      * @since 2.7.7
      */
     private static LoadingStrategy[] loadLoadingStrategies() {
+        //这里用的是 java原生的spi
         return stream(load(LoadingStrategy.class).spliterator(), false).sorted()
                 .toArray(LoadingStrategy[]::new);
     }
@@ -379,7 +380,8 @@ public class ExtensionLoader<T> {
     }
 
     /**
-     * 根据URL 条件获取扩展点
+     * 根据URL 条件获取匹配的 激活扩展点
+     * 找 group、参数等都匹配的
      * Get activate extensions.
      *
      * @param url    url
@@ -396,7 +398,9 @@ public class ExtensionLoader<T> {
         List<String> names = values == null ? new ArrayList<>(0) : Arrays.stream(values)
                 .map(StringUtils::trim)
                 .collect(Collectors.toList());
+
         Set<String> namesSet = new HashSet<>(names);
+
         if (!namesSet.contains(REMOVE_VALUE_PREFIX + DEFAULT_KEY)) {
             if (cachedActivateGroups.size() == 0) {
                 synchronized (cachedActivateGroups) {
@@ -887,6 +891,7 @@ public class ExtensionLoader<T> {
                 }
 
                 if (CollectionUtils.isNotEmpty(wrapperClassesList)) {
+
                     for (Class<?> wrapperClass : wrapperClassesList) {
                         Wrapper wrapper = wrapperClass.getAnnotation(Wrapper.class);
                         boolean match = (wrapper == null) || (
@@ -960,6 +965,8 @@ public class ExtensionLoader<T> {
         try {
             for (Method method : instance.getClass()
                     .getMethods()) {
+
+                // 判断方法是否为setter方法
                 if (!isSetter(method)) {
                     continue;
                 }
@@ -1366,6 +1373,7 @@ public class ExtensionLoader<T> {
         }
 
         if (clazz.isAnnotationPresent(Adaptive.class)) {
+            //自适应扩展点
             cacheAdaptiveClass(clazz, overridden);
         } else if (isWrapperClass(clazz)) {
             // 缓存包装类
@@ -1538,11 +1546,19 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * 获取适应扩展类
+     *
+     * @return {@link Class}<{@link ?}>
+     */
     private Class<?> getAdaptiveExtensionClass() {
         getExtensionClasses();
+        //是 自适应类，直接返回该扩展实现类
         if (cachedAdaptiveClass != null) {
             return cachedAdaptiveClass;
         }
+
+        //是自适应方法，需要动态生成 自适应类
         return cachedAdaptiveClass = createAdaptiveExtensionClass();
     }
 
@@ -1556,10 +1572,13 @@ public class ExtensionLoader<T> {
         } catch (Throwable ignore) {
 
         }
+        // 生成自适应拓展类
         String code = new AdaptiveClassCodeGenerator(type, cachedDefaultName).generate();
         org.apache.dubbo.common.compiler.Compiler compiler =
                 extensionDirector.getExtensionLoader(org.apache.dubbo.common.compiler.Compiler.class)
                 .getAdaptiveExtension();
+
+        //编译加载
         return compiler.compile(type, code, classLoader);
     }
 
