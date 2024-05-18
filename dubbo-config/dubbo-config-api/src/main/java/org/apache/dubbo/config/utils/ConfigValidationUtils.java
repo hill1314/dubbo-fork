@@ -204,6 +204,7 @@ public class ConfigValidationUtils {
         // check && override if necessary
         List<URL> registryList = new ArrayList<>();
         ApplicationConfig application = interfaceConfig.getApplication();
+        //多个注册中心
         List<RegistryConfig> registries = interfaceConfig.getRegistries();
         if (CollectionUtils.isNotEmpty(registries)) {
             for (RegistryConfig config : registries) {
@@ -216,14 +217,18 @@ public class ConfigValidationUtils {
                     address = ANYHOST_VALUE;
                 }
                 if (!RegistryConfig.NO_AVAILABLE.equalsIgnoreCase(address)) {
+                    //配置信息统一
                     Map<String, String> map = new HashMap<String, String>();
+                    //来自应用的配置
                     AbstractConfig.appendParameters(map, application);
+                    //来自注册中心的配置
                     AbstractConfig.appendParameters(map, config);
                     map.put(PATH_KEY, RegistryService.class.getName());
                     AbstractInterfaceConfig.appendRuntimeParameters(map);
                     if (!map.containsKey(PROTOCOL_KEY)) {
                         map.put(PROTOCOL_KEY, DUBBO_PROTOCOL);
                     }
+                    //拼接URL
                     List<URL> urls = UrlUtils.parseURLs(address, map);
 
                     for (URL url : urls) {
@@ -240,9 +245,19 @@ public class ConfigValidationUtils {
                 }
             }
         }
+
+        //生成兼容的注册中心（是否生成实例级别的注册中心）
         return genCompatibleRegistries(interfaceConfig.getScopeModel(), registryList, provider);
     }
 
+    /**
+     * 生成 兼容注册表
+     *
+     * @param scopeModel   范围模型
+     * @param registryList 注册表列表
+     * @param provider     供应商
+     * @return {@link List}<{@link URL}>
+     */
     private static List<URL> genCompatibleRegistries(ScopeModel scopeModel, List<URL> registryList, boolean provider) {
         List<URL> result = new ArrayList<>(registryList.size());
         registryList.forEach(registryURL -> {

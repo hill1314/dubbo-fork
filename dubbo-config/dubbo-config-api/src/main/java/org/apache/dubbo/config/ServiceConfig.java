@@ -559,7 +559,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         if (StringUtils.isEmpty(path)) {
             path = interfaceName;
         }
-        //
+        //真正的服务发布
         doExportUrls(registerType);
         exported();
     }
@@ -571,6 +571,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrls(RegisterTypeEnum registerType) {
+        //本地服务仓库
         ModuleServiceRepository repository = getScopeModel().getServiceRepository();
         ServiceDescriptor serviceDescriptor;
         final boolean serverService = ref instanceof ServerService;
@@ -601,7 +602,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         providerModel.setDestroyRunner(getDestroyRunner());
         repository.registerProvider(providerModel);
 
-        //获取注册中心地址
+        //获取注册中心地址（可以多个）（默认会同时注册服务和接口两个维度）
         List<URL> registryURLs = ConfigValidationUtils.loadRegistries(this, true);
 
         //多协议发布
@@ -636,7 +637,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         // init serviceMetadata attachments
         serviceMetadata.getAttachments().putAll(map);
 
-        //服务URL
+        //具体协议d 服务URL
         URL url = buildUrl(protocolConfig, map);
 
         //流程服务执行器
@@ -897,6 +898,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
             // export to local if the config is not remote (export to remote only when config is remote)
             if (!SCOPE_REMOTE.equalsIgnoreCase(scope)) {
+                //local 服务发布，将发布到 injvm
                 exportLocal(url);
             }
 
@@ -914,6 +916,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                             .build();
                 }
 
+                //发布远程服务
                 url = exportRemote(url, registryURLs, registerType);
                 if (!isGeneric(generic) && !getScopeModel().isInternal()) {
                     MetadataUtils.publishServiceDefinition(url, providerModel.getServiceModel(), getApplicationModel());
@@ -923,11 +926,12 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                     String[] extProtocols = extProtocol.split(",", -1);
                     protocols.addAll(Arrays.asList(extProtocols));
                 }
+
                 // export extra protocols
                 for (String protocol : protocols) {
                     if (StringUtils.isNotBlank(protocol)) {
-                        URL localUrl =
-                                URLBuilder.from(url).setProtocol(protocol).build();
+                        URL localUrl = URLBuilder.from(url).setProtocol(protocol).build();
+                        //发布远程服务
                         localUrl = exportRemote(localUrl, registryURLs, registerType);
                         if (!isGeneric(generic) && !getScopeModel().isInternal()) {
                             MetadataUtils.publishServiceDefinition(
@@ -941,6 +945,14 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         this.urls.add(url);
     }
 
+    /**
+     * 发布远程服务
+     *
+     * @param url          url
+     * @param registryURLs 注册表URL
+     * @param registerType 寄存器类型
+     * @return {@link URL}
+     */
     private URL exportRemote(URL url, List<URL> registryURLs, RegisterTypeEnum registerType) {
         if (CollectionUtils.isNotEmpty(registryURLs) && registerType != RegisterTypeEnum.NEVER_REGISTER) {
             for (URL registryURL : registryURLs) {
@@ -953,13 +965,16 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                     continue;
                 }
 
+                //是否动态注册
                 url = url.addParameterIfAbsent(DYNAMIC_KEY, registryURL.getParameter(DYNAMIC_KEY));
+
                 URL monitorUrl = ConfigValidationUtils.loadMonitor(this, registryURL);
                 if (monitorUrl != null) {
                     url = url.putAttribute(MONITOR_KEY, monitorUrl);
                 }
 
                 // For providers, this is used to enable custom proxy to generate invoker
+                //动态代理的生成方式
                 String proxy = url.getParameter(PROXY_KEY);
                 if (StringUtils.isNotEmpty(proxy)) {
                     registryURL = registryURL.addParameter(PROXY_KEY, proxy);
@@ -974,6 +989,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                     }
                 }
 
+                //发布url
                 doExportUrl(registryURL.putAttribute(EXPORT_KEY, url), true, registerType);
             }
 
@@ -989,6 +1005,13 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         return url;
     }
 
+    /**
+     * 发布url
+     *
+     * @param url          url
+     * @param withMetaData 带有元数据
+     * @param registerType 寄存器类型
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrl(URL url, boolean withMetaData, RegisterTypeEnum registerType) {
         if (!url.getParameter(REGISTER_KEY, true)) {
@@ -1000,21 +1023,26 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
             url = url.addParameter(REGISTER_KEY, false);
         }
 
+        //my-note 执行器（完成本地方法调用的代理类）（ref:服务实例）
         Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, url);
         if (withMetaData) {
             invoker = new DelegateProviderMetaDataInvoker(invoker, this);
         }
+
+        //这里调的 protocol的 自适应 动态代理类 protocol$Adaptive()
         Exporter<?> exporter = protocolSPI.export(invoker);
-        exporters
-                .computeIfAbsent(registerType, k -> new CopyOnWriteArrayList<>())
-                .add(exporter);
+
+        exporters.computeIfAbsent(registerType, k -> new CopyOnWriteArrayList<>()).add(exporter);
     }
 
     /**
      * always export injvm
+     *
+     * @param url url
      */
     private void exportLocal(URL url) {
         URL local = URLBuilder.from(url)
+                //injvm
                 .setProtocol(LOCAL_PROTOCOL)
                 .setHost(LOCALHOST_VALUE)
                 .setPort(0)

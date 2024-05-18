@@ -33,6 +33,9 @@ import static org.apache.dubbo.common.constants.LoggerCodeConstants.PROXY_FAILED
 
 /**
  * JavassistRpcProxyFactory
+ *
+ * @author huleilei9
+ * @date 2024/05/18
  */
 public class JavassistProxyFactory extends AbstractProxyFactory {
     private static final ErrorTypeAwareLogger logger =
@@ -86,6 +89,7 @@ public class JavassistProxyFactory extends AbstractProxyFactory {
                 @Override
                 protected Object doInvoke(T proxy, String methodName, Class<?>[] parameterTypes, Object[] arguments)
                         throws Throwable {
+                    //
                     return wrapper.invokeMethod(proxy, methodName, parameterTypes, arguments);
                 }
             };

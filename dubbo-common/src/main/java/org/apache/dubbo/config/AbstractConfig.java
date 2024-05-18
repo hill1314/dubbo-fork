@@ -733,6 +733,13 @@ public abstract class AbstractConfig implements Serializable {
         refreshed.set(true);
     }
 
+    /**
+     * 使用前缀刷新
+     * 将配置加载到内存中
+     *
+     * @param prefixes   前缀
+     * @param configMode 配置模式
+     */
     protected void refreshWithPrefixes(List<String> prefixes, ConfigMode configMode) {
         Environment environment = getScopeModel().modelEnvironment();
         List<Map<String, String>> configurationMaps = environment.getConfigurationMaps();

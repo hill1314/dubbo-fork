@@ -75,6 +75,13 @@ public class UrlUtils {
      */
     private static final String URL_PARAM_STARTING_SYMBOL = "?";
 
+    /**
+     * 解析url
+     *
+     * @param address  住址
+     * @param defaults 默认值
+     * @return {@link URL}
+     */
     public static URL parseURL(String address, Map<String, String> defaults) {
         if (StringUtils.isEmpty(address)) {
             throw new IllegalArgumentException("Address is not allowed to be empty, please re-enter.");
@@ -172,6 +179,13 @@ public class UrlUtils {
         return u;
     }
 
+    /**
+     * 解析url
+     *
+     * @param address  住址
+     * @param defaults 默认值
+     * @return {@link List}<{@link URL}>
+     */
     public static List<URL> parseURLs(String address, Map<String, String> defaults) {
         if (StringUtils.isEmpty(address)) {
             throw new IllegalArgumentException("Address is not allowed to be empty, please re-enter.");

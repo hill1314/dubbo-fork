@@ -97,6 +97,9 @@ public final class DubboBootstrap {
 
     private final Condition condition = lock.newCondition();
 
+    /**
+     * 线程池仓库
+     */
     private final ExecutorRepository executorRepository;
 
     private final Environment environment;
@@ -168,12 +171,17 @@ public final class DubboBootstrap {
 
     private DubboBootstrap(ApplicationModel applicationModel) {
         this.applicationModel = applicationModel;
+        //配置管理
         configManager = applicationModel.getApplicationConfigManager();
+        //环境
         environment = applicationModel.modelEnvironment();
 
+        //线程池
         executorRepository = ExecutorRepository.getInstance(applicationModel);
+        //部署
         applicationDeployer = applicationModel.getDeployer();
-        // listen deploy events
+
+        // listen deploy events 监听
         applicationDeployer.addDeployListener(new DeployListenerAdapter<ApplicationModel>() {
             @Override
             public void onStarted(ApplicationModel scopeModel) {
@@ -190,6 +198,7 @@ public final class DubboBootstrap {
                 notifyStopped(applicationModel);
             }
         });
+
         // register DubboBootstrap bean
         applicationModel.getBeanFactory().registerBean(this);
     }

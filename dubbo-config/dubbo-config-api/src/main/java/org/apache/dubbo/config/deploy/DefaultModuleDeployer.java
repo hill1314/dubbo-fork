@@ -147,7 +147,9 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
                     .getConfigManager()
                     .getModule()
                     .orElseThrow(() -> new IllegalStateException("Default module config is not initialized"));
+            //发布服务是否异步
             exportAsync = Boolean.TRUE.equals(moduleConfig.getExportAsync());
+            //调用服务是否异步
             referAsync = Boolean.TRUE.equals(moduleConfig.getReferAsync());
 
             // start in background
@@ -176,6 +178,7 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
         //再次调用 应用模型 初始化
         applicationDeployer.initialize();
 
+        //启动服务
         return startSync();
     }
 
@@ -200,7 +203,7 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
             //模块模型初始化
             initialize();
 
-            // 发布服务
+            //my-note 发布服务
             exportServices();
 
             // prepare application instance
@@ -209,7 +212,7 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
                 applicationDeployer.prepareInternalModule();
             }
 
-            // refer services
+            //my-note 引用服务（一个应用可能既是发布者也是调用者） refer services
             referServices();
 
             // if no async export/refer services, just set started
