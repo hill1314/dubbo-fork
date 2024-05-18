@@ -19,6 +19,12 @@ package org.apache.dubbo.rpc.model;
 import org.apache.dubbo.common.extension.ExtensionScope;
 import org.apache.dubbo.common.extension.SPI;
 
+/**
+ * 应用程序初始化侦听器
+ *
+ * @author huleilei9
+ * @date 2024/05/17
+ */
 @SPI(scope = ExtensionScope.APPLICATION)
 public interface ApplicationInitListener {
     /**

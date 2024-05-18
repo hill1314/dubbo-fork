@@ -39,36 +39,61 @@ import java.util.concurrent.locks.Lock;
 
 /**
  * 应用程序模型
- *
- * {@link ExtensionLoader}, {@code DubboBootstrap} and this class are at present designed to be
- * singleton or static (by itself totally static or uses some static fields). So the instances
- * returned from them are of process scope. If you want to support multiple dubbo servers in one
- * single process, you may need to refactor those three classes.
  * <p>
- * Represent an application which is using Dubbo and store basic metadata info for using
- * during the processing of RPC invoking.
+ * {@link ExtensionLoader}, {@code DubboBootstrap} and this class are at present designed to be singleton or static (by
+ * itself totally static or uses some static fields). So the instances returned from them are of process scope. If you
+ * want to support multiple dubbo servers in one single process, you may need to refactor those three classes.
  * <p>
- * ApplicationModel includes many ProviderModel which is about published services
- * and many Consumer Model which is about subscribed services.
+ * Represent an application which is using Dubbo and store basic metadata info for using during the processing of RPC
+ * invoking.
+ * <p>
+ * ApplicationModel includes many ProviderModel which is about published services and many Consumer Model which is about
+ * subscribed services.
  * <p>
  */
 public class ApplicationModel extends ScopeModel {
     protected static final Logger LOGGER = LoggerFactory.getLogger(ApplicationModel.class);
     public static final String NAME = "ApplicationModel";
+    /**
+     * 模块模型
+     */
     private final List<ModuleModel> moduleModels = new CopyOnWriteArrayList<>();
+    /**
+     * pub模块模型
+     */
     private final List<ModuleModel> pubModuleModels = new CopyOnWriteArrayList<>();
+    /**
+     * 环境
+     */
     private volatile Environment environment;
+    /**
+     * 配置管理器
+     */
     private volatile ConfigManager configManager;
     private volatile ServiceRepository serviceRepository;
+    /**
+     * 部署器
+     */
     private volatile ApplicationDeployer deployer;
 
+    /**
+     * 框架模型
+     */
     private final FrameworkModel frameworkModel;
 
+    /**
+     * 内部模块
+     */
     private final ModuleModel internalModule;
 
+    /**
+     * 默认模块
+     */
     private volatile ModuleModel defaultModule;
 
-    // internal module index is 0, default module index is 1
+    /**
+     * 模块索引 internal module index is 0, default module index is 1
+     */
     private final AtomicInteger moduleIndex = new AtomicInteger(0);
 
     // --------- static methods ----------//
@@ -82,15 +107,16 @@ public class ApplicationModel extends ScopeModel {
     }
 
     /**
-     * During destroying the default FrameworkModel, the FrameworkModel.defaultModel() or ApplicationModel.defaultModel()
-     * will return a broken model, maybe cause unpredictable problem.
-     * Recommendation: Avoid using the default model as much as possible.
+     * During destroying the default FrameworkModel, the FrameworkModel.defaultModel() or
+     * ApplicationModel.defaultModel() will return a broken model, maybe cause unpredictable problem. Recommendation:
+     * Avoid using the default model as much as possible.
      *
      * @return the global default ApplicationModel
      */
     public static ApplicationModel defaultModel() {
         // should get from default FrameworkModel, avoid out of sync
-        return FrameworkModel.defaultModel().defaultApplication();
+        return FrameworkModel.defaultModel()
+                .defaultApplication();
     }
 
     // ------------- instance methods ---------------//
@@ -107,22 +133,28 @@ public class ApplicationModel extends ScopeModel {
      */
     protected ApplicationModel(FrameworkModel frameworkModel, boolean isInternal) {
         super(frameworkModel, ExtensionScope.APPLICATION, isInternal);
+
         synchronized (instLock) {
             Assert.notNull(frameworkModel, "FrameworkModel can not be null");
+
+            //与框架模型关联
             this.frameworkModel = frameworkModel;
             frameworkModel.addApplication(this);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info(getDesc() + " is created");
             }
+
             //初始化
             initialize();
 
+            // 初始化默认模块
             this.internalModule = new ModuleModel(this, true);
+
             //service级别的内存数据库
             this.serviceRepository = new ServiceRepository(this);
 
-            ExtensionLoader<ApplicationInitListener> extensionLoader =
-                    this.getExtensionLoader(ApplicationInitListener.class);
+            // 加载并初始化 应用初始化监听 扩展 （都是先获取加载器，再通过加载器获取实现）
+            ExtensionLoader<ApplicationInitListener> extensionLoader = this.getExtensionLoader(ApplicationInitListener.class);
             Set<String> listenerNames = extensionLoader.getSupportedExtensions();
             for (String listenerName : listenerNames) {
                 extensionLoader.getExtension(listenerName).init();
@@ -131,23 +163,27 @@ public class ApplicationModel extends ScopeModel {
             //初始化应用扩展（包括环境、配置）
             initApplicationExts();
 
-            ExtensionLoader<ScopeModelInitializer> initializerExtensionLoader =
-                    this.getExtensionLoader(ScopeModelInitializer.class);
+            //加载 并调用 模型初始化器
+            ExtensionLoader<ScopeModelInitializer> initializerExtensionLoader = this.getExtensionLoader(ScopeModelInitializer.class);
             Set<ScopeModelInitializer> initializers = initializerExtensionLoader.getSupportedExtensionInstances();
             for (ScopeModelInitializer initializer : initializers) {
+                //初始化应用模型
                 initializer.initializeApplicationModel(this);
             }
 
             Assert.notNull(getApplicationServiceRepository(), "ApplicationServiceRepository can not be null");
             Assert.notNull(getApplicationConfigManager(), "ApplicationConfigManager can not be null");
-            Assert.assertTrue(
-                    getApplicationConfigManager().isInitialized(), "ApplicationConfigManager can not be initialized");
+            Assert.assertTrue(getApplicationConfigManager().isInitialized(), "ApplicationConfigManager can not be "
+                    + "initialized");
         }
     }
 
-    // already synchronized in constructor
+    /**
+     * 初始化应用程序扩展 （配置、环境） already synchronized in constructor
+     */
     private void initApplicationExts() {
-        Set<ApplicationExt> exts = this.getExtensionLoader(ApplicationExt.class).getSupportedExtensionInstances();
+        Set<ApplicationExt> exts = this.getExtensionLoader(ApplicationExt.class)
+                .getSupportedExtensionInstances();
         for (ApplicationExt ext : exts) {
             ext.initialize();
         }
@@ -217,16 +253,16 @@ public class ApplicationModel extends ScopeModel {
     @Override
     public Environment modelEnvironment() {
         if (environment == null) {
-            environment =
-                    (Environment) this.getExtensionLoader(ApplicationExt.class).getExtension(Environment.NAME);
+            environment = (Environment) this.getExtensionLoader(ApplicationExt.class)
+                    .getExtension(Environment.NAME);
         }
         return environment;
     }
 
     public ConfigManager getApplicationConfigManager() {
         if (configManager == null) {
-            configManager = (ConfigManager)
-                    this.getExtensionLoader(ApplicationExt.class).getExtension(ConfigManager.NAME);
+            configManager = (ConfigManager) this.getExtensionLoader(ApplicationExt.class)
+                    .getExtension(ConfigManager.NAME);
         }
         return configManager;
     }
@@ -240,7 +276,8 @@ public class ApplicationModel extends ScopeModel {
     }
 
     public boolean NotExistApplicationConfig() {
-        return !getApplicationConfigManager().getApplication().isPresent();
+        return !getApplicationConfigManager().getApplication()
+                .isPresent();
     }
 
     public ApplicationConfig getCurrentConfig() {
@@ -252,9 +289,9 @@ public class ApplicationModel extends ScopeModel {
     }
 
     public String tryGetApplicationName() {
-        Optional<ApplicationConfig> appCfgOptional =
-                getApplicationConfigManager().getApplication();
-        return appCfgOptional.isPresent() ? appCfgOptional.get().getName() : null;
+        Optional<ApplicationConfig> appCfgOptional = getApplicationConfigManager().getApplication();
+        return appCfgOptional.isPresent() ? appCfgOptional.get()
+                .getName() : null;
     }
 
     void addModule(ModuleModel moduleModel, boolean isInternal) {
@@ -282,8 +319,8 @@ public class ApplicationModel extends ScopeModel {
 
     void tryDestroy() {
         synchronized (instLock) {
-            if (this.moduleModels.isEmpty()
-                    || (this.moduleModels.size() == 1 && this.moduleModels.get(0) == internalModule)) {
+            if (this.moduleModels.isEmpty() || (this.moduleModels.size() == 1
+                    && this.moduleModels.get(0) == internalModule)) {
                 destroy();
             }
         }
@@ -355,7 +392,8 @@ public class ApplicationModel extends ScopeModel {
 
     protected boolean containsClassLoader(ClassLoader classLoader) {
         return moduleModels.stream()
-                .anyMatch(moduleModel -> moduleModel.getClassLoaders().contains(classLoader));
+                .anyMatch(moduleModel -> moduleModel.getClassLoaders()
+                        .contains(classLoader));
     }
 
     public ApplicationDeployer getDeployer() {
@@ -378,7 +416,8 @@ public class ApplicationModel extends ScopeModel {
      */
     @Deprecated
     public static Collection<ConsumerModel> allConsumerModels() {
-        return defaultModel().getApplicationServiceRepository().allConsumerModels();
+        return defaultModel().getApplicationServiceRepository()
+                .allConsumerModels();
     }
 
     /**
@@ -386,7 +425,8 @@ public class ApplicationModel extends ScopeModel {
      */
     @Deprecated
     public static Collection<ProviderModel> allProviderModels() {
-        return defaultModel().getApplicationServiceRepository().allProviderModels();
+        return defaultModel().getApplicationServiceRepository()
+                .allProviderModels();
     }
 
     /**
@@ -394,15 +434,19 @@ public class ApplicationModel extends ScopeModel {
      */
     @Deprecated
     public static ProviderModel getProviderModel(String serviceKey) {
-        return defaultModel().getDefaultModule().getServiceRepository().lookupExportedService(serviceKey);
+        return defaultModel().getDefaultModule()
+                .getServiceRepository()
+                .lookupExportedService(serviceKey);
     }
 
-     /**
+    /**
      * @deprecated ConsumerModel should fetch from context
      */
     @Deprecated
     public static ConsumerModel getConsumerModel(String serviceKey) {
-        return defaultModel().getDefaultModule().getServiceRepository().lookupReferredService(serviceKey);
+        return defaultModel().getDefaultModule()
+                .getServiceRepository()
+                .lookupReferredService(serviceKey);
     }
 
     /**
@@ -450,7 +494,8 @@ public class ApplicationModel extends ScopeModel {
      */
     @Deprecated
     public static String getName() {
-        return defaultModel().getCurrentConfig().getName();
+        return defaultModel().getCurrentConfig()
+                .getName();
     }
 
     /**
@@ -464,8 +509,11 @@ public class ApplicationModel extends ScopeModel {
     // only for unit test
     @Deprecated
     public static void reset() {
-        if (FrameworkModel.defaultModel().getDefaultAppModel() != null) {
-            FrameworkModel.defaultModel().getDefaultAppModel().destroy();
+        if (FrameworkModel.defaultModel()
+                .getDefaultAppModel() != null) {
+            FrameworkModel.defaultModel()
+                    .getDefaultAppModel()
+                    .destroy();
         }
     }
 

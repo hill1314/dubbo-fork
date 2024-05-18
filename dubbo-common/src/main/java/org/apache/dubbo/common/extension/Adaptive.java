@@ -35,9 +35,12 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Adaptive {
     /**
+     * 确定要注入的目标扩展。目标扩展的名称由URL中传递的参数决定，参数名称由此方法给定。
+     * 如果在URL中找不到指定的参数，则默认扩展将用于依赖项注入（在其接口的SPI中指定）
+     *
      * Decide which target extension to be injected. The name of the target extension is decided by the parameter passed
      * in the URL, and the parameter names are given by this method.
-     * <p>
+     *
      * If the specified parameters are not found from {@link URL}, then the default extension will be used for
      * dependency injection (specified in its interface's {@link SPI}).
      * <p>

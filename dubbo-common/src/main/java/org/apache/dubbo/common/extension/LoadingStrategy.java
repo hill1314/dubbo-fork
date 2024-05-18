@@ -18,6 +18,13 @@ package org.apache.dubbo.common.extension;
 
 import org.apache.dubbo.common.lang.Prioritized;
 
+/**
+ * 装载策略
+ * 具体实现类里 实现从 META-INF/dubbo 、 META-INF/dubbo/internal 、 META-INF/services 中加载扩展点信息
+ *
+ * @author huleilei9
+ * @date 2024/05/18
+ */
 public interface LoadingStrategy extends Prioritized {
 
     String directory();

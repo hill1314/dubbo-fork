@@ -100,8 +100,11 @@ public class AdaptiveClassCodeGenerator {
     }
 
     /**
+     *  自适应拓展类代码生成
      * generate and return class code
+     *
      * @param sort - whether sort methods
+     * @return {@link String}
      */
     public String generate(boolean sort) {
         // no need to generate adaptive class since there's no adaptive method found.

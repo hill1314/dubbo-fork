@@ -36,6 +36,14 @@ public abstract class AbstractCompiler implements Compiler {
 
     private static final Map<String, Lock> CLASS_IN_CREATION_MAP = new ConcurrentHashMap<>();
 
+    /**
+     * 编译
+     *
+     * @param neighbor
+     * @param code        密码
+     * @param classLoader 类加载器
+     * @return {@link Class}<{@link ?}>
+     */
     @Override
     public Class<?> compile(Class<?> neighbor, String code, ClassLoader classLoader) {
         code = code.trim();

@@ -42,6 +42,8 @@ public class SpiExtensionInjector implements ExtensionInjector {
         if (loader == null) {
             return null;
         }
+
+        //扩展列表为空时，找自适应扩展
         if (!loader.getSupportedExtensions().isEmpty()) {
             return loader.getAdaptiveExtension();
         }

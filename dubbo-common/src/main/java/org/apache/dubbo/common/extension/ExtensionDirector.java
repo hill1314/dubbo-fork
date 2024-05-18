@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ExtensionDirector implements ExtensionAccessor {
 
     /**
-     * 扩展点加载程序 缓存
+     * 扩展点加载程序 缓存 （一个扩展点类 对应一个ExtensionLoader）
      */
     private final ConcurrentMap<Class<?>, ExtensionLoader<?>> extensionLoadersMap = new ConcurrentHashMap<>(64);
     /**
@@ -117,7 +117,7 @@ public class ExtensionDirector implements ExtensionAccessor {
             loader = createExtensionLoader0(type);
         }
 
-        // 2. find in parent
+        // 2. find in parent （委派给父类查找）
         if (loader == null) {
             if (this.parent != null) {
                 loader = this.parent.getExtensionLoader(type);

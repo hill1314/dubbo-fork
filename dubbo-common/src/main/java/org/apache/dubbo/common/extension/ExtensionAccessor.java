@@ -33,7 +33,7 @@ public interface ExtensionAccessor {
     ExtensionDirector getExtensionDirector();
 
     /**
-     * 获取扩展加载程序
+     * 获取扩展加载器
      *
      * @param type 类型
      * @return {@link ExtensionLoader }<{@link T }>
@@ -43,7 +43,7 @@ public interface ExtensionAccessor {
     }
 
     /**
-     * 获取扩展
+     * 获取指定名称和类型的扩展实现
      *
      * @param type 类型
      * @param name 名称
@@ -55,7 +55,7 @@ public interface ExtensionAccessor {
     }
 
     /**
-     * 获得自适应扩展
+     * 获得自适应扩展实现
      *
      * @param type 类型
      * @return {@link T }
@@ -66,7 +66,7 @@ public interface ExtensionAccessor {
     }
 
     /**
-     * 获取默认扩展名
+     * 获取默认扩展实现
      *
      * @param type 类型
      * @return {@link T }

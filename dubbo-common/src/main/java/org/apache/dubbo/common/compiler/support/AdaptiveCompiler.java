@@ -23,7 +23,11 @@ import org.apache.dubbo.rpc.model.FrameworkModel;
 import org.apache.dubbo.rpc.model.ScopeModelAware;
 
 /**
+ * Compiler 的自适应扩展点
  * AdaptiveCompiler. (SPI, Singleton, ThreadSafe)
+ *
+ * @author huleilei9
+ * @date 2024/05/18
  */
 @Adaptive
 public class AdaptiveCompiler implements Compiler, ScopeModelAware {
@@ -44,12 +48,16 @@ public class AdaptiveCompiler implements Compiler, ScopeModelAware {
     public Class<?> compile(Class<?> neighbor, String code, ClassLoader classLoader) {
         Compiler compiler;
         ExtensionLoader<Compiler> loader = frameworkModel.getExtensionLoader(Compiler.class);
-        String name = DEFAULT_COMPILER; // copy reference
+        // copy reference
+        String name = DEFAULT_COMPILER;
         if (name != null && name.length() > 0) {
+            //名称不为空时，根据名称获取 扩展点实现
             compiler = loader.getExtension(name);
         } else {
+            //为空时，取默认实现
             compiler = loader.getDefaultExtension();
         }
+
         return compiler.compile(neighbor, code, classLoader);
     }
 }
