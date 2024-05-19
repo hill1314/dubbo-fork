@@ -54,6 +54,15 @@ public class FailoverClusterInvoker<T> extends AbstractClusterInvoker<T> {
         super(directory);
     }
 
+    /**
+     * 执行调用
+     *
+     * @param invocation  调用
+     * @param invokers    调用程序
+     * @param loadbalance 负载平衡
+     * @return {@link Result}
+     * @throws RpcException RPCException.(API,Prototype,ThreadSafe)
+     */
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Result doInvoke(Invocation invocation, final List<Invoker<T>> invokers, LoadBalance loadbalance)
@@ -65,6 +74,7 @@ public class FailoverClusterInvoker<T> extends AbstractClusterInvoker<T> {
         RpcException le = null; // last exception.
         List<Invoker<T>> invoked = new ArrayList<Invoker<T>>(copyInvokers.size()); // invoked invokers.
         Set<String> providers = new HashSet<String>(len);
+
         for (int i = 0; i < len; i++) {
             // Reselect before retry to avoid a change of candidate `invokers`.
             // NOTE: if `invokers` changed, then `invoked` also lose accuracy.
@@ -74,12 +84,19 @@ public class FailoverClusterInvoker<T> extends AbstractClusterInvoker<T> {
                 // check again
                 checkInvokers(copyInvokers, invocation);
             }
+
+            //选择要调用的invoker
             Invoker<T> invoker = select(loadbalance, invocation, copyInvokers, invoked);
+            //记录这次调用的 invoker
             invoked.add(invoker);
+
             RpcContext.getServiceContext().setInvokers((List) invoked);
+
             boolean success = false;
             try {
+                //执行调用
                 Result result = invokeWithContext(invoker, invocation);
+
                 if (le != null && logger.isWarnEnabled()) {
                     logger.warn(
                             CLUSTER_FAILED_MULTIPLE_RETRIES,

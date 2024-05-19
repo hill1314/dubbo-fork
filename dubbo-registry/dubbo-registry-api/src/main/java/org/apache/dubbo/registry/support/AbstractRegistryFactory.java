@@ -52,6 +52,12 @@ public abstract class AbstractRegistryFactory implements RegistryFactory, ScopeM
         this.registryManager = applicationModel.getBeanFactory().getBean(RegistryManager.class);
     }
 
+    /**
+     * 获取注册表
+     *
+     * @param url url
+     * @return {@link Registry}
+     */
     @Override
     public Registry getRegistry(URL url) {
         if (registryManager == null) {
@@ -72,7 +78,9 @@ public abstract class AbstractRegistryFactory implements RegistryFactory, ScopeM
                 .removeAttribute(REFER_KEY)
                 .build();
 
+        //key: 协议 + 地址 + 端口 + registry 实现（ nacos://192.168.8,133:8848/org.apache.dubbo,registry.RegistryService ）
         String key = createRegistryCacheKey(url);
+
         Registry registry = null;
         boolean check = url.getParameter(CHECK_KEY, true) && url.getPort() != 0;
 
@@ -92,7 +100,10 @@ public abstract class AbstractRegistryFactory implements RegistryFactory, ScopeM
             }
 
             // create registry by spi/ioc
+            // 调用子类实现创建
             registry = createRegistry(url);
+
+            //检查注册中心是否创建成功
             if (check && registry == null) {
                 throw new IllegalStateException("Can not create registry " + url);
             }

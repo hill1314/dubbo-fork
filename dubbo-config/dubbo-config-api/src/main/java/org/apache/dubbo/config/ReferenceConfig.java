@@ -101,7 +101,11 @@ import static org.apache.dubbo.rpc.cluster.Constants.PEER_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.REFER_KEY;
 
 /**
+ * 客户端配置
  * Please avoid using this class for any new application, use {@link ReferenceConfigBase} instead.
+ *
+ * @author huleilei9
+ * @date 2024/05/19
  */
 public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
 
@@ -132,10 +136,14 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
      */
     private ProxyFactory proxyFactory;
 
+    /**
+     * 保存一些客户端信息
+     */
     private ConsumerModel consumerModel;
 
     /**
      * The interface proxy reference
+     * 实例代理引用
      */
     private transient volatile T ref;
 
@@ -234,12 +242,10 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
         if (ref == null) {
             if (getScopeModel().isLifeCycleManagedExternally()) {
                 // prepare model for reference
-                getScopeModel().getDeployer()
-                        .prepare();
+                getScopeModel().getDeployer().prepare();
             } else {
                 // ensure start module, compatible with old api usage
-                getScopeModel().getDeployer()
-                        .start();
+                getScopeModel().getDeployer().start();
             }
 
             init(check);
@@ -318,6 +324,11 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
         init(true);
     }
 
+    /**
+     * 初始化 客户端代理
+     *
+     * @param check 检查
+     */
     protected synchronized void init(boolean check) {
         if (initialized && ref != null) {
             return;
@@ -356,10 +367,10 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
             // version.
             consumerModel.setConfig(this);
 
+            //注册客户端
             repository.registerConsumer(consumerModel);
 
-            serviceMetadata.getAttachments()
-                    .putAll(referenceParameters);
+            serviceMetadata.getAttachments().putAll(referenceParameters);
 
             //创建代理
             ref = createProxy(referenceParameters);
@@ -464,7 +475,7 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
     }
 
     /**
-     * 创建代理
+     * 创建客户端代理
      *
      * @param referenceParameters 参考参数
      * @return {@link T }
@@ -645,7 +656,7 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
     private void createInvoker() {
         if (urls.size() == 1) {
             URL curUrl = urls.get(0);
-            //协议对应的反射调用
+            //协议对应的反射调用 （RegistryProtocol.refer）
             invoker = protocolSPI.refer(interfaceClass, curUrl);
 
             // registry url, mesh-enable and unloadClusterRelated is true, not need Cluster.

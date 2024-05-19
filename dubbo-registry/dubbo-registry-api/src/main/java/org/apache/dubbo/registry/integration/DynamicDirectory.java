@@ -59,6 +59,10 @@ import static org.apache.dubbo.remoting.Constants.CHECK_KEY;
 
 /**
  * DynamicDirectory
+ * 动态目录监听（监听服务地址变化的通知）
+ *
+ * @author huleilei9
+ * @date 2024/05/19
  */
 public abstract class DynamicDirectory<T> extends AbstractDirectory<T> implements NotifyListener {
 

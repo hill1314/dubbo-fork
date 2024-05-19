@@ -175,6 +175,8 @@ public class NacosRegistry extends FailbackRegistry {
         try {
             if (PROVIDER_SIDE.equals(url.getSide()) || getUrl().getParameter(REGISTER_CONSUMER_URL_KEY, false)) {
                 String serviceName = getServiceName(url);
+
+                //服务实例
                 Instance instance = createInstance(url);
                 /**
                  *  namingService.registerInstance with {@link org.apache.dubbo.registry.support.AbstractRegistry#registryUrl}
@@ -222,6 +224,13 @@ public class NacosRegistry extends FailbackRegistry {
         doSubscribe(url, nacosAggregateListener, serviceNames);
     }
 
+    /**
+     * 执行订阅
+     *
+     * @param url          url
+     * @param listener     听众
+     * @param serviceNames 服务名称
+     */
     private void doSubscribe(final URL url, final NacosAggregateListener listener, final Set<String> serviceNames) {
         try {
             if (isServiceNamesWithCompatibleMode(url)) {
@@ -236,13 +245,19 @@ public class NacosRegistry extends FailbackRegistry {
                  * in https://github.com/apache/dubbo/issues/5978
                  */
                 for (String serviceName : serviceNames) {
+                    //获取服务端IP列表
                     List<Instance> instances =
                             namingService.getAllInstances(serviceName, getUrl().getGroup(Constants.DEFAULT_GROUP));
+
+                    //通知订阅
                     notifySubscriber(url, serviceName, listener, instances);
                 }
+
                 for (String serviceName : serviceNames) {
+                    //订阅监听
                     subscribeEventListener(serviceName, url, listener);
                 }
+
             } else {
                 for (String serviceName : serviceNames) {
                     List<Instance> instances = new LinkedList<>();
@@ -657,6 +672,7 @@ public class NacosRegistry extends FailbackRegistry {
         }
         List<URL> aggregatedUrls =
                 toUrlWithEmpty(url, listener.saveAndAggregateAllInstances(serviceName, enabledInstances));
+
         NacosRegistry.this.notify(url, listener.getNotifyListener(), aggregatedUrls);
     }
 
@@ -678,6 +694,12 @@ public class NacosRegistry extends FailbackRegistry {
         return new DubboServiceAddressURL(url.getUrlAddress(), url.getUrlParam(), consumerURL, null);
     }
 
+    /**
+     * 创建服务实例
+     *
+     * @param url url
+     * @return {@link Instance}
+     */
     private Instance createInstance(URL url) {
         // Append default category if absent
         String category = url.getCategory(DEFAULT_CATEGORY);

@@ -55,6 +55,13 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
 
     protected volatile ExecutorService executor;
 
+    /**
+     * 抽象客户端链接
+     *
+     * @param url     url
+     * @param handler 处理程序
+     * @throws RemotingException RemotingException.(API,Prototype,ThreadSafe)
+     */
     public AbstractClient(URL url, ChannelHandler handler) throws RemotingException {
         super(url, handler);
         // set default needReconnect true when channel is not connected
@@ -63,6 +70,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
         initExecutor(url);
 
         try {
+            //创建并初始化 bootstrap
             doOpen();
         } catch (Throwable t) {
             close();
@@ -239,6 +247,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
                 return;
             }
 
+            //
             doConnect();
 
             if (!isConnected()) {

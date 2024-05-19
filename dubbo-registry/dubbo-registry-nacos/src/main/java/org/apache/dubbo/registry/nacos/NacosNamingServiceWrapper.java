@@ -94,9 +94,11 @@ public class NacosNamingServiceWrapper {
 
     public void subscribe(String serviceName, String group, EventListener eventListener) throws NacosException {
         String nacosServiceName = handleInnerSymbol(serviceName);
+        //订阅信息
         SubscribeInfo subscribeInfo = new SubscribeInfo(nacosServiceName, group, eventListener);
         NamingService namingService = ConcurrentHashMapUtils.computeIfAbsent(
                 subscribeStatus, subscribeInfo, info -> nacosConnectionManager.getNamingService());
+        //订阅
         accept(() -> namingService.subscribe(nacosServiceName, group, eventListener));
     }
 

@@ -89,7 +89,7 @@ public class JavassistProxyFactory extends AbstractProxyFactory {
                 @Override
                 protected Object doInvoke(T proxy, String methodName, Class<?>[] parameterTypes, Object[] arguments)
                         throws Throwable {
-                    //
+                    //调动态生成的类 ，动态生成的类里面 又调真实的 服务实现
                     return wrapper.invokeMethod(proxy, methodName, parameterTypes, arguments);
                 }
             };

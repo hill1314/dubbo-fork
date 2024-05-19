@@ -33,7 +33,11 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.timeout.IdleStateEvent;
 
 /**
+ * 服务端请求处理
  * NettyServerHandler.
+ *
+ * @author huleilei9
+ * @date 2024/05/20
  */
 @io.netty.channel.ChannelHandler.Sharable
 public class NettyServerHandler extends ChannelDuplexHandler {

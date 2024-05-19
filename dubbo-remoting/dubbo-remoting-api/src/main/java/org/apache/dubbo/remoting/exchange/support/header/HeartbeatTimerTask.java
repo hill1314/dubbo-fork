@@ -27,7 +27,10 @@ import static org.apache.dubbo.common.constants.CommonConstants.HEARTBEAT_EVENT;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.TRANSPORT_FAILED_RESPONSE;
 
 /**
- * HeartbeatTimerTask
+ * 心跳检测定时任务
+ *
+ * @author huleilei9
+ * @date 2024/05/19
  */
 public class HeartbeatTimerTask extends AbstractTimerTask {
 
@@ -35,6 +38,14 @@ public class HeartbeatTimerTask extends AbstractTimerTask {
 
     private final int heartbeat;
 
+    /**
+     * 心跳检测定时任务
+     *
+     * @param channelProvider  渠道提供商
+     * @param hashedWheelTimer 散列轮计时器
+     * @param heartbeatTick    心跳滴答
+     * @param heartbeat        心跳
+     */
     HeartbeatTimerTask(
             ChannelProvider channelProvider, HashedWheelTimer hashedWheelTimer, Long heartbeatTick, int heartbeat) {
         super(channelProvider, hashedWheelTimer, heartbeatTick);

@@ -71,7 +71,9 @@ public class HeaderExchangeClient implements ExchangeClient {
         if (startTimer) {
             URL url = client.getUrl();
             idleTimeout = getIdleTimeout(url);
+            //开启重连连接
             startReconnectTask(url);
+            //开启心跳检测
             startHeartBeatTask(url);
         } else {
             idleTimeout = 0;
@@ -251,6 +253,13 @@ public class HeaderExchangeClient implements ExchangeClient {
         }
     }
 
+    /**
+     * 计算重新连接持续时间
+     *
+     * @param url  url
+     * @param tick 打上钩
+     * @return long
+     */
     private long calculateReconnectDuration(URL url, long tick) {
         long leastReconnectDuration = url.getParameter(LEAST_RECONNECT_DURATION_KEY, LEAST_RECONNECT_DURATION);
         return Math.max(leastReconnectDuration, tick);

@@ -249,6 +249,11 @@ public class MigrationInvoker<T> implements MigrationClusterInvoker<T> {
         return false;
     }
 
+    /**
+     * 迁移到应用程序优先调用程序
+     *
+     * @param newRule 新规则
+     */
     @Override
     public void migrateToApplicationFirstInvoker(MigrationRule newRule) {
         CountDownLatch latch = new CountDownLatch(0);
@@ -445,6 +450,11 @@ public class MigrationInvoker<T> implements MigrationClusterInvoker<T> {
         }
     }
 
+    /**
+     * 刷新服务发现调用程序
+     *
+     * @param latch 门闩
+     */
     protected void refreshServiceDiscoveryInvoker(CountDownLatch latch) {
         clearListener(serviceDiscoveryInvoker);
         if (needRefresh(serviceDiscoveryInvoker)) {
@@ -457,6 +467,7 @@ public class MigrationInvoker<T> implements MigrationClusterInvoker<T> {
             }
             serviceDiscoveryInvoker = registryProtocol.getServiceDiscoveryInvoker(cluster, registry, type, url);
         }
+
         setListener(serviceDiscoveryInvoker, () -> {
             latch.countDown();
             if (reportService.hasReporter()) {
@@ -479,6 +490,7 @@ public class MigrationInvoker<T> implements MigrationClusterInvoker<T> {
             if (invoker != null) {
                 invoker.destroy();
             }
+            //
             invoker = registryProtocol.getInvoker(cluster, registry, type, url);
         }
         setListener(invoker, () -> {

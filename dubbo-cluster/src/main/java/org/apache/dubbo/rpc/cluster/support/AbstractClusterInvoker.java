@@ -64,6 +64,9 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
     private static final ErrorTypeAwareLogger logger =
             LoggerFactory.getErrorTypeAwareLogger(AbstractClusterInvoker.class);
 
+    /**
+     * 目录，里面包含了 invoker 列表
+     */
     protected Directory<T> directory;
 
     protected boolean availableCheck;
@@ -175,6 +178,7 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
             }
         }
 
+        //
         Invoker<T> invoker = doSelect(loadbalance, invocation, invokers, selected);
 
         if (sticky) {
@@ -196,6 +200,8 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
             checkShouldInvalidateInvoker(tInvoker);
             return tInvoker;
         }
+
+        //
         Invoker<T> invoker = loadbalance.select(invokers, getUrl(), invocation);
 
         // If the `invoker` is in the  `selected` or invoker is unavailable && availablecheck is true, reselect.
@@ -352,17 +358,20 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
         //        }
 
         InvocationProfilerUtils.enterDetailProfiler(invocation, () -> "Router route.");
+        //invoker list
         List<Invoker<T>> invokers = list(invocation);
         InvocationProfilerUtils.releaseDetailProfiler(invocation);
 
         checkInvokers(invokers, invocation);
 
+        //负载均衡
         LoadBalance loadbalance = initLoadBalance(invokers, invocation);
         RpcUtils.attachInvocationIdIfAsync(getUrl(), invocation);
 
         InvocationProfilerUtils.enterDetailProfiler(
                 invocation, () -> "Cluster " + this.getClass().getName() + " invoke.");
         try {
+            //目标服务，目标服务url列表，负载均衡
             return doInvoke(invocation, invokers, loadbalance);
         } finally {
             InvocationProfilerUtils.releaseDetailProfiler(invocation);
@@ -399,6 +408,13 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
         }
     }
 
+    /**
+     * 使用上下文调用
+     *
+     * @param invoker    调用程序
+     * @param invocation 调用
+     * @return {@link Result}
+     */
     protected Result invokeWithContext(Invoker<T> invoker, Invocation invocation) {
         Invoker<T> originInvoker = setContext(invoker);
         Result result;
@@ -409,6 +425,7 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
                         "Invoker invoke. Target Address: " + invoker.getUrl().getAddress());
             }
             setRemote(invoker, invocation);
+            //
             result = invoker.invoke(invocation);
         } finally {
             clearContext(originInvoker);

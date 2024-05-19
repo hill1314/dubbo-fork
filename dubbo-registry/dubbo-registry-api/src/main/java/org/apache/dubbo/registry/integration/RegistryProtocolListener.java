@@ -26,6 +26,9 @@ import static org.apache.dubbo.common.extension.ExtensionScope.MODULE;
 /**
  * RegistryProtocol listener is introduced to provide a chance to user to customize or change export and refer behavior
  * of RegistryProtocol. For example: re-export or re-refer on the fly when certain condition meets.
+ *
+ * @author huleilei9
+ * @date 2024/05/19
  */
 @SPI(scope = MODULE)
 public interface RegistryProtocolListener {

@@ -212,7 +212,7 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
                 applicationDeployer.prepareInternalModule();
             }
 
-            //my-note 引用服务（一个应用可能既是发布者也是调用者） refer services
+            //my-note 客户端引用服务（一个应用可能既是发布者也是调用者） refer services
             referServices();
 
             // if no async export/refer services, just set started
@@ -556,6 +556,9 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
         asyncExportingFutures.clear();
     }
 
+    /**
+     * 引用服务
+     */
     private void referServices() {
         configManager.getReferences().forEach(rc -> {
             try {
@@ -564,6 +567,7 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
                     referenceConfig.refresh();
                 }
 
+                //初始化
                 if (rc.shouldInit()) {
                     if (referAsync || rc.shouldReferAsync()) {
                         ExecutorService executor = executorRepository.getServiceReferExecutor();

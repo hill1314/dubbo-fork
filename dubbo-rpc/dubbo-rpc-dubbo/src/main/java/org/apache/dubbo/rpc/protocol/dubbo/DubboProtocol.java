@@ -116,6 +116,14 @@ public class DubboProtocol extends AbstractProtocol {
     public DubboProtocol(FrameworkModel frameworkModel) {
         requestHandler = new ExchangeHandlerAdapter(frameworkModel) {
 
+            /**
+             * 客户端请求响应
+             *
+             * @param channel 频道
+             * @param message 消息
+             * @return {@link CompletableFuture}<{@link Object}>
+             * @throws RemotingException RemotingException.(API,Prototype,ThreadSafe)
+             */
             @Override
             public CompletableFuture<Object> reply(ExchangeChannel channel, Object message) throws RemotingException {
 
@@ -141,6 +149,7 @@ public class DubboProtocol extends AbstractProtocol {
                 }
                 // need to consider backward-compatibility if it's a callback
                 if (Boolean.TRUE.toString().equals(inv.getObjectAttachmentWithoutConvert(IS_CALLBACK_SERVICE_INVOKE))) {
+                    //请求方法
                     String methodsStr = invoker.getUrl().getParameters().get("methods");
                     boolean hasMethod = false;
                     if (methodsStr == null || !methodsStr.contains(",")) {
@@ -170,8 +179,9 @@ public class DubboProtocol extends AbstractProtocol {
 
                 RpcContext.getServiceContext().setRemoteAddress(channel.getRemoteAddress());
 
-                //代理反射调用，处理客户端请求
+                //代理反射调用，处理客户端请求 （调AbstractProxyInvoker）
                 Result result = invoker.invoke(inv);
+
                 return result.thenApply(Function.identity());
             }
 
@@ -479,7 +489,7 @@ public class DubboProtocol extends AbstractProtocol {
         //序列化
         optimizeSerialization(url);
 
-        // create rpc invoker. 客户端PRC反射
+        // create rpc invoker. 客户端PRC反射（里面包含了客户端连接）
         DubboInvoker<T> invoker = new DubboInvoker<T>(serviceType, url, getClients(url), invokers);
         invokers.add(invoker);
 
@@ -496,6 +506,7 @@ public class DubboProtocol extends AbstractProtocol {
         int connections = url.getParameter(CONNECTIONS_KEY, 0);
         // whether to share connection
         // if not configured, connection is shared, otherwise, one connection for one service
+        //判断是否共享链接，如果未配置，则共享连接，否则，一个连接对应一个服务
         if (connections == 0) {
             /*
              * The xml configuration should have a higher priority than properties.
@@ -506,6 +517,7 @@ public class DubboProtocol extends AbstractProtocol {
                     : url.getParameter(SHARE_CONNECTIONS_KEY, (String) null);
             connections = Integer.parseInt(shareConnectionsStr);
 
+            //获取共享客户端连接
             return getSharedClient(url, connections);
         }
 
@@ -515,6 +527,7 @@ public class DubboProtocol extends AbstractProtocol {
     }
 
     /**
+     * 获取共享链接
      * Get shared connection
      *
      * @param url
@@ -522,16 +535,19 @@ public class DubboProtocol extends AbstractProtocol {
      */
     @SuppressWarnings("unchecked")
     private SharedClientsProvider getSharedClient(URL url, int connectNum) {
+        //IP+端口
         String key = url.getAddress();
 
         // connectNum must be greater than or equal to 1
         int expectedConnectNum = Math.max(connectNum, 1);
+
+        //有则返回已有值，否则创建一个新的
         return referenceClientMap.compute(key, (originKey, originValue) -> {
             if (originValue != null && originValue.increaseCount()) {
                 return originValue;
             } else {
-                return new SharedClientsProvider(
-                        this, originKey, buildReferenceCountExchangeClientList(url, expectedConnectNum));
+                return new SharedClientsProvider(this, originKey,
+                        buildReferenceCountExchangeClientList(url, expectedConnectNum));
             }
         });
     }
@@ -546,10 +562,11 @@ public class DubboProtocol extends AbstractProtocol {
 
     /**
      * Bulk build client
+     * 批量生成客户端
      *
-     * @param url
-     * @param connectNum
-     * @return
+     * @param url        url
+     * @param connectNum connect num
+     * @return {@link List}<{@link ReferenceCountExchangeClient}>
      */
     private List<ReferenceCountExchangeClient> buildReferenceCountExchangeClientList(URL url, int connectNum) {
         List<ReferenceCountExchangeClient> clients = new ArrayList<>();
@@ -564,12 +581,15 @@ public class DubboProtocol extends AbstractProtocol {
     /**
      * Build a single client
      *
-     * @param url
-     * @return
+     * @param url url
+     * @return {@link ReferenceCountExchangeClient}
      */
     private ReferenceCountExchangeClient buildReferenceCountExchangeClient(URL url) {
+        //创建客户端
         ExchangeClient exchangeClient = initClient(url);
+        //包装一个引用计数
         ReferenceCountExchangeClient client = new ReferenceCountExchangeClient(exchangeClient, DubboCodec.NAME);
+
         // read configs
         int shutdownTimeout = ConfigurationUtils.getServerShutdownTimeout(url.getScopeModel());
         client.setShutdownWaitTime(shutdownTimeout);
@@ -579,13 +599,17 @@ public class DubboProtocol extends AbstractProtocol {
     /**
      * Create new connection
      *
-     * @param url
+     * @param url url
+     * @return {@link ExchangeClient}
      */
     private ExchangeClient initClient(URL url) {
         /*
          * Instance of url is InstanceAddressURL, so addParameter actually adds parameters into ServiceInstance,
          * which means params are shared among different services. Since client is shared among services this is currently not a problem.
          */
+        //协议
+        // url实例是InstanceAddressURL，所以addParameter实际上是将参数添加到ServiceInstance中，这意味着param在不同的服务之间共享。
+        // 由于客户端是在服务之间共享的，这目前也不是问题
         String str = url.getParameter(CLIENT_KEY, url.getParameter(SERVER_KEY, DEFAULT_REMOTING_CLIENT));
 
         // BIO is not allowed since it has severe performance issue.
@@ -603,6 +627,7 @@ public class DubboProtocol extends AbstractProtocol {
 
         try {
             ScopeModel scopeModel = url.getScopeModel();
+            //心跳检查间隔时间
             int heartbeat = UrlUtils.getHeartbeat(url);
             // Replace InstanceAddressURL with ServiceConfigURL.
             url = new ServiceConfigURL(
@@ -619,6 +644,7 @@ public class DubboProtocol extends AbstractProtocol {
             url = url.setScopeModel(scopeModel);
 
             // connection should be lazy
+            // 是否延迟创建链接，requestHandler 是 响应请求的处理
             return url.getParameter(LAZY_CONNECT_KEY, false)
                     ? new LazyConnectExchangeClient(url, requestHandler)
                     : Exchangers.connect(url, requestHandler);

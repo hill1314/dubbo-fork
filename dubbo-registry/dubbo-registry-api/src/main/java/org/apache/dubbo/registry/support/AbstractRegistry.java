@@ -125,6 +125,8 @@ public abstract class AbstractRegistry implements Registry {
                 .getBeanFactory()
                 .getBean(FrameworkExecutorRepository.class)
                 .getSharedScheduledExecutor();
+
+        //是否开启本地缓存
         if (localCacheEnabled) {
             // Start file save timer
             syncSaveFile = url.getParameter(REGISTRY_FILESAVE_SYNC_KEY, false);
@@ -140,8 +142,8 @@ public abstract class AbstractRegistry implements Registry {
                 if (!file.exists()
                         && file.getParentFile() != null
                         && !file.getParentFile().exists()) {
-                    if (!file.getParentFile().mkdirs()) {
 
+                    if (!file.getParentFile().mkdirs()) {
                         IllegalArgumentException illegalArgumentException =
                                 new IllegalArgumentException("Invalid registry cache file " + file
                                         + ", cause: Failed to create directory " + file.getParentFile() + "!");
@@ -167,6 +169,7 @@ public abstract class AbstractRegistry implements Registry {
             // When starting the subscription center,
             // we need to read the local cache file for future Registry fault tolerance processing.
             loadProperties();
+
             notify(url.getBackupUrls());
         }
     }
@@ -554,6 +557,8 @@ public abstract class AbstractRegistry implements Registry {
         if (logger.isInfoEnabled()) {
             logger.info("Notify urls for subscribe url " + url + ", url size: " + urls.size());
         }
+
+
         // keep every provider's category.
         Map<String, List<URL>> result = new HashMap<>();
         for (URL u : urls) {
@@ -566,16 +571,20 @@ public abstract class AbstractRegistry implements Registry {
         if (result.size() == 0) {
             return;
         }
+
         Map<String, List<URL>> categoryNotified = notified.computeIfAbsent(url, u -> new ConcurrentHashMap<>());
         for (Map.Entry<String, List<URL>> entry : result.entrySet()) {
             String category = entry.getKey();
             List<URL> categoryList = entry.getValue();
             categoryNotified.put(category, categoryList);
+
+            //通知 （ RegistryDirectory.notify）
             listener.notify(categoryList);
 
             // We will update our cache file after each notification.
             // When our Registry has a subscribed failure due to network jitter, we can return at least the existing
             // cache URL.
+            //服务地址本地缓存
             if (localCacheEnabled) {
                 saveProperties(url);
             }

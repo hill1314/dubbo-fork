@@ -97,6 +97,9 @@ public class RpcInvocation implements Invocation, Serializable {
 
     private transient InvokeMode invokeMode;
 
+    /**
+     * invoker 调用列表
+     */
     private transient List<Invoker<?>> invokedInvokers = new LinkedList<>();
 
     /**

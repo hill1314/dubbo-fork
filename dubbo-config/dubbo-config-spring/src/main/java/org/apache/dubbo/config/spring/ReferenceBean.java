@@ -58,6 +58,7 @@ import static org.apache.dubbo.common.constants.LoggerCodeConstants.CONFIG_DUBBO
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.PROXY_FAILED;
 
 /**
+ * 客户端代理bean
  * <p>
  * Spring FactoryBean for {@link ReferenceConfig}.
  * </p>
@@ -68,15 +69,15 @@ import static org.apache.dubbo.common.constants.LoggerCodeConstants.PROXY_FAILED
  * <pre class="code">
  * &#64;Configuration
  * public class ReferenceConfiguration {
- *     &#64;Bean
- *     &#64;DubboReference(group = "demo")
+ *     @Bean
+ *     @DubboReference(group = "demo")
  *     public ReferenceBean&lt;HelloService&gt; helloService() {
  *         return new ReferenceBean();
  *     }
  *
  *     // As GenericService
- *     &#64;Bean
- *     &#64;DubboReference(group = "demo", interfaceClass = HelloService.class)
+ *     @Bean
+ *     @DubboReference(group = "demo", interfaceClass = HelloService.class)
  *     public ReferenceBean&lt;GenericService&gt; genericHelloService() {
  *         return new ReferenceBean();
  *     }

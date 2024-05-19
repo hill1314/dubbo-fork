@@ -47,6 +47,15 @@ public class InvokerInvocationHandler implements InvocationHandler {
         this.serviceModel = url.getServiceModel();
     }
 
+    /**
+     * 客户端调用实际的反射调用
+     *
+     * @param proxy  代理
+     * @param method 方法
+     * @param args   args
+     * @return {@link Object}
+     * @throws Throwable 可丢弃
+     */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (method.getDeclaringClass() == Object.class) {
@@ -66,6 +75,8 @@ public class InvokerInvocationHandler implements InvocationHandler {
         } else if (parameterTypes.length == 1 && "equals".equals(methodName)) {
             return invoker.equals(args[0]);
         }
+
+        //rpc反射调用,设置本次请求的参数信息
         RpcInvocation rpcInvocation = new RpcInvocation(
                 serviceModel,
                 method.getName(),

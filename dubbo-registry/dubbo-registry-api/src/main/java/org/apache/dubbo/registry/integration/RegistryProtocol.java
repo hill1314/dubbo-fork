@@ -274,7 +274,8 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
         // export invoker  my-note 先发布协议监听（将 originInvoker 存储在协议层，调当前配置的协议来暴露服务监听，保证可以接收服务请求）
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker, providerUrl);
 
-        // url to registry my-note 要注册到的url地址
+        // url to registry
+        // my-note 要注册到的url地址
         final Registry registry = getRegistry(registryUrl);
         // my-note 服务提供方地址
         final URL registeredProviderUrl = customizeURL(providerUrl, registryUrl);
@@ -282,7 +283,7 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
         // decide if we need to delay publish (provider itself and registry should both need to register)
         boolean register = providerUrl.getParameter(REGISTER_KEY, true) && registryUrl.getParameter(REGISTER_KEY, true);
         if (register) {
-            //my-note 注册
+            //注册
             register(registry, registeredProviderUrl);
         }
 
@@ -306,6 +307,7 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
         }
 
         notifyExport(exporter);
+
         // Ensure that a new exporter instance is returned every time export
         return new DestroyableExporter<>(exporter);
     }
@@ -552,15 +554,27 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
         return registryUrl.removeParameters(DYNAMIC_KEY, ENABLED_KEY).toFullString();
     }
 
+    /**
+     * 创建refer
+     *
+     * @param type 类型
+     * @param url  url
+     * @return {@link Invoker}<{@link T}>
+     * @throws RpcException RPCException.(API,Prototype,ThreadSafe)
+     */
     @Override
     @SuppressWarnings("unchecked")
     public <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException {
+        //注册中心地址
         url = getRegistryUrl(url);
+        //注册中心实例
         Registry registry = getRegistry(url);
+
         if (RegistryService.class.equals(type)) {
             return proxyFactory.getInvoker((T) registry, type, url);
         }
 
+        //按group分组创建
         // group="a,b" or group="*"
         Map<String, String> qs = (Map<String, String>) url.getAttribute(REFER_KEY);
         String group = qs.get(GROUP_KEY);
@@ -570,14 +584,26 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
             }
         }
 
+        //集群策略（默认 failOver）
         Cluster cluster = Cluster.getCluster(url.getScopeModel(), qs.get(CLUSTER_KEY));
         return doRefer(cluster, registry, type, url, qs);
     }
 
+    /**
+     * 创建refer
+     *
+     * @param cluster    簇
+     * @param registry   注册表
+     * @param type       类型
+     * @param url        url
+     * @param parameters 参数
+     * @return {@link Invoker}<{@link T}>
+     */
     protected <T> Invoker<T> doRefer(
             Cluster cluster, Registry registry, Class<T> type, URL url, Map<String, String> parameters) {
         Map<String, Object> consumerAttribute = new HashMap<>(url.getAttributes());
         consumerAttribute.remove(REFER_KEY);
+
         String p = isEmpty(parameters.get(PROTOCOL_KEY)) ? CONSUMER : parameters.get(PROTOCOL_KEY);
         URL consumerUrl = new ServiceConfigURL(
                 p,
@@ -589,6 +615,8 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
                 parameters,
                 consumerAttribute);
         url = url.putAttribute(CONSUMER_URL_KEY, consumerUrl);
+
+        //服务迁移调用程序（接口级注册 迁移为 应用级注册）
         ClusterInvoker<T> migrationInvoker = getMigrationInvoker(this, cluster, registry, type, url, consumerUrl);
         return interceptInvoker(migrationInvoker, url, consumerUrl);
     }
@@ -597,6 +625,17 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
         return !ProtocolUtils.isGeneric(parameters.get(GENERIC_KEY)) ? type.getName() : parameters.get(INTERFACE_KEY);
     }
 
+    /**
+     * 获取迁移调用程序
+     *
+     * @param registryProtocol 注册表协议
+     * @param cluster          簇
+     * @param registry         注册表
+     * @param type             类型
+     * @param url              url
+     * @param consumerUrl      消费者url
+     * @return {@link ClusterInvoker}<{@link T}>
+     */
     protected <T> ClusterInvoker<T> getMigrationInvoker(
             RegistryProtocol registryProtocol,
             Cluster cluster,
@@ -608,18 +647,23 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
     }
 
     /**
-     * This method tries to load all RegistryProtocolListener definitions, which are used to control the behaviour of invoker by interacting with defined, then uses those listeners to
-     * change the status and behaviour of the MigrationInvoker.
+     * 此方法尝试加载所有RegistryProtocolListener定义，这些定义用于控制 调用程序通过与已定义的交互 的行为，
+     * 然后使用这些侦听器来更改 MigrationInvoker的状态和行为
+     *
+     * This method tries to load all RegistryProtocolListener definitions, which are used to control the behaviour of
+     * invoker by interacting with defined, then uses those listeners to change the status and behaviour of the
+     * MigrationInvoker.
      * <p>
-     * Currently available Listener is MigrationRuleListener, one used to control the Migration behaviour with dynamically changing rules.
+     * Currently available Listener is MigrationRuleListener, one used to control the Migration behaviour with
+     * dynamically changing rules.
      *
      * @param invoker     MigrationInvoker that determines which type of invoker list to use
      * @param url         The original url generated during refer, more like a registry:// style url
      * @param consumerUrl Consumer url representing current interface and its config
-     * @param <T>         The service definition
      * @return The @param MigrationInvoker passed in
      */
     protected <T> Invoker<T> interceptInvoker(ClusterInvoker<T> invoker, URL url, URL consumerUrl) {
+        //注册协议监听
         List<RegistryProtocolListener> listeners = findRegistryProtocolListeners(url);
         if (CollectionUtils.isEmpty(listeners)) {
             return invoker;
@@ -643,6 +687,15 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
         return doCreateInvoker(directory, cluster, registry, type);
     }
 
+    /**
+     * 创建Invoker
+     *
+     * @param directory 目录
+     * @param cluster   簇
+     * @param registry  注册表
+     * @param type      类型
+     * @return {@link ClusterInvoker}<{@link T}>
+     */
     protected <T> ClusterInvoker<T> doCreateInvoker(
             DynamicDirectory<T> directory, Cluster cluster, Registry registry, Class<T> type) {
         directory.setRegistry(registry);
@@ -650,6 +703,8 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
         // all attributes of REFER_KEY
         Map<String, String> parameters =
                 new HashMap<>(directory.getConsumerUrl().getParameters());
+
+        //注册地址
         URL urlToRegistry = new ServiceConfigURL(
                 parameters.get(PROTOCOL_KEY) == null ? CONSUMER : parameters.get(PROTOCOL_KEY),
                 parameters.remove(REGISTER_IP_KEY),
@@ -663,8 +718,11 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
             registry.register(directory.getRegisteredConsumerUrl());
         }
         directory.buildRouterChain(urlToRegistry);
+
+        //订阅地址
         directory.subscribe(toSubscribeUrl(urlToRegistry));
 
+        //多个invoker 转为一个虚拟的合并的 invoker
         return (ClusterInvoker<T>) cluster.join(directory, true);
     }
 

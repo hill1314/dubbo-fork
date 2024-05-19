@@ -120,6 +120,9 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
 
     private final Environment environment;
 
+    /**
+     * 引用缓存
+     */
     private final ReferenceCache referenceCache;
 
     private final FrameworkExecutorRepository frameworkExecutorRepository;

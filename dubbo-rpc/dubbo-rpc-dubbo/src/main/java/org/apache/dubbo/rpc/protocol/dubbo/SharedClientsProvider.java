@@ -26,6 +26,12 @@ import java.util.Objects;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.PROTOCOL_ERROR_CLOSE_CLIENT;
 
+/**
+ * 共享客户端提供程序
+ *
+ * @author huleilei9
+ * @date 2024/05/19
+ */
 public class SharedClientsProvider implements ClientsProvider {
     private static final ErrorTypeAwareLogger logger =
             LoggerFactory.getErrorTypeAwareLogger(SharedClientsProvider.class);
@@ -45,6 +51,11 @@ public class SharedClientsProvider implements ClientsProvider {
         return clients;
     }
 
+    /**
+     * 增加计数
+     *
+     * @return boolean
+     */
     public synchronized boolean increaseCount() {
         if (checkClientCanUse(clients)) {
             batchClientRefIncr(clients);

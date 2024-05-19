@@ -353,6 +353,11 @@ public final class DubboBootstrap {
         return this;
     }
 
+    /**
+     * 获取服务Invoker缓存
+     *
+     * @return {@link ReferenceCache}
+     */
     public ReferenceCache getCache() {
         return applicationDeployer.getReferenceCache();
     }

@@ -38,6 +38,14 @@ public class HeaderExchanger implements Exchanger {
 
     public static final String NAME = "header";
 
+    /**
+     * 连接
+     *
+     * @param url     url
+     * @param handler 处理程序
+     * @return {@link ExchangeClient}
+     * @throws RemotingException RemotingException.(API,Prototype,ThreadSafe)
+     */
     @Override
     public ExchangeClient connect(URL url, ExchangeHandler handler) throws RemotingException {
         return new HeaderExchangeClient(

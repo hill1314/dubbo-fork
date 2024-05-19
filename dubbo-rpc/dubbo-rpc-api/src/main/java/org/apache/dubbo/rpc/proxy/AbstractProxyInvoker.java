@@ -97,8 +97,8 @@ public abstract class AbstractProxyInvoker<T> implements Invoker<T> {
                 }
             }
 
-            Object value = doInvoke(
-                    proxy, invocation.getMethodName(), invocation.getParameterTypes(), invocation.getArguments());
+            //这里调的是 JavassistProxyFactory.getInvoker 里动态生成的类
+            Object value = doInvoke(proxy, invocation.getMethodName(), invocation.getParameterTypes(), invocation.getArguments());
 
             CompletableFuture<Object> future = wrapWithFuture(value, invocation);
             CompletableFuture<AppResponse> appResponseFuture = future.handle((obj, t) -> {

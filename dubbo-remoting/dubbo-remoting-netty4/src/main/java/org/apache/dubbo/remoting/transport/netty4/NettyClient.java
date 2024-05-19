@@ -185,6 +185,12 @@ public class NettyClient extends AbstractClient {
         }
     }
 
+    /**
+     * 建立连接
+     *
+     * @param serverAddress 服务器地址
+     * @throws RemotingException RemotingException.(API,Prototype,ThreadSafe)
+     */
     private void doConnect(InetSocketAddress serverAddress) throws RemotingException {
         long start = System.currentTimeMillis();
         ChannelFuture future = bootstrap.connect(serverAddress);

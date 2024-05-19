@@ -89,6 +89,7 @@ public class ServiceDiscoveryRegistryDirectory<T> extends DynamicDirectory<T> {
             LoggerFactory.getErrorTypeAwareLogger(ServiceDiscoveryRegistryDirectory.class);
 
     /**
+     * invoker url 地址映射
      * instance address to invoker mapping.
      * The initial value is null and the midway may be assigned to null, please use the local variable reference
      */

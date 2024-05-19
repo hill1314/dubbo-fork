@@ -197,6 +197,13 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
         setRouterChain(routerChain);
     }
 
+    /**
+     * 获取invoker列表
+     *
+     * @param invocation 调用
+     * @return {@link List}<{@link Invoker}<{@link T}>>
+     * @throws RpcException RPCException.(API,Prototype,ThreadSafe)
+     */
     @Override
     public List<Invoker<T>> list(Invocation invocation) throws RpcException {
         if (destroyed) {
@@ -229,6 +236,7 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
                 }
             }
 
+            //路由过滤
             List<Invoker<T>> routedResult = doList(singleChain, availableInvokers, invocation);
             if (routedResult.isEmpty()) {
                 // 2-2 - No provider available.
@@ -409,13 +417,22 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
      * 2. all the invokers in disabled invokers list should be removed in the valid invokers list
      * 3. all the invokers disappeared from total invokers should be removed in the need to reconnect list
      * 4. all the invokers disappeared from total invokers should be removed in the disabled invokers list
+     *
+     * 刷新调用程序
+     * 1.所有需要重新连接的调用方列表都应在有效的调用方名单中删除
+     * 2.禁用调用程序列表中的所有调用程序都应在有效调用程序列表中将其删除
+     * 3.所有从总调用程序中消失的调用程序都应在需要重新连接列表中删除
+     * 4.所有从总调用程序中消失的调用程序都应在禁用的调用程序列表中删除
+     *
      */
     public void refreshInvoker() {
         LockUtils.safeLock(invokerRefreshLock, LockUtils.DEFAULT_TIMEOUT, () -> {
             if (invokersInitialized) {
+                //
                 refreshInvokerInternal();
             }
         });
+        //监控上报
         MetricsEventBus.publish(
                 RegistryEvent.refreshDirectoryEvent(applicationModel, getSummary(), getDirectoryMeta()));
     }
@@ -424,6 +441,9 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
         return Collections.emptyMap();
     }
 
+    /**
+     * 刷新调用程序内部
+     */
     private void refreshInvokerInternal() {
         BitList<Invoker<T>> copiedInvokers = invokers.clone();
         refreshInvokers(copiedInvokers, invokersToReconnect);

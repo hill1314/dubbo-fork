@@ -336,6 +336,13 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
 
     // -- Protected api
 
+    /**
+     * 获取回调线程池
+     *
+     * @param url url
+     * @param inv inv
+     * @return {@link ExecutorService}
+     */
     protected ExecutorService getCallbackExecutor(URL url, Invocation inv) {
         if (InvokeMode.SYNC == RpcUtils.getInvokeMode(getUrl(), inv)) {
             return new ThreadlessExecutor();

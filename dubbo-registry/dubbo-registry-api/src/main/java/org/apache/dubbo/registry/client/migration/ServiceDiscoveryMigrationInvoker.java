@@ -34,6 +34,16 @@ public class ServiceDiscoveryMigrationInvoker<T> extends MigrationInvoker<T> {
     private static final ErrorTypeAwareLogger logger =
             LoggerFactory.getErrorTypeAwareLogger(ServiceDiscoveryMigrationInvoker.class);
 
+    /**
+     * 服务发现迁移调用程序
+     *
+     * @param registryProtocol 注册表协议
+     * @param cluster          簇
+     * @param registry         注册表
+     * @param type             类型
+     * @param url              url
+     * @param consumerUrl      消费者url
+     */
     public ServiceDiscoveryMigrationInvoker(
             RegistryProtocol registryProtocol,
             Cluster cluster,

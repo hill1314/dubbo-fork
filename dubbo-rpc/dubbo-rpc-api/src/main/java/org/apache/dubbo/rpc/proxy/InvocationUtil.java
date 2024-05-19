@@ -36,17 +36,28 @@ public class InvocationUtil {
     private static final ErrorTypeAwareLogger logger =
             LoggerFactory.getErrorTypeAwareLogger(InvokerInvocationHandler.class);
 
+    /**
+     * RPC反射调用
+     *
+     * @param invoker       调用程序
+     * @param rpcInvocation rpc调用
+     * @return {@link Object}
+     * @throws Throwable 可丢弃
+     */
     public static Object invoke(Invoker<?> invoker, RpcInvocation rpcInvocation) throws Throwable {
         RpcContext.RestoreServiceContext originServiceContext = RpcContext.storeServiceContext();
 
         try {
+            //请求URL
             URL url = invoker.getUrl();
+            //调用服务接口的全路径，com.*.*Service
             String serviceKey = url.getServiceKey();
             rpcInvocation.setTargetServiceUniqueName(serviceKey);
 
             // invoker.getUrl() returns consumer url.
             RpcServiceContext.getServiceContext().setConsumerUrl(url);
 
+            //是否开启埋点
             if (ProfilerSwitch.isEnableSimpleProfiler()) {
                 ProfilerEntry parentProfiler = Profiler.getBizProfiler();
                 ProfilerEntry bizProfiler;
@@ -60,17 +71,18 @@ public class InvocationUtil {
                             + "MethodName:" + rpcInvocation.getMethodName());
                 }
                 rpcInvocation.put(Profiler.PROFILER_KEY, bizProfiler);
+
                 try {
+                    //调的是 MigrationInvoker
                     return invoker.invoke(rpcInvocation).recreate();
                 } finally {
                     Profiler.release(bizProfiler);
-                    Long timeout =
-                            RpcUtils.convertToNumber(rpcInvocation.getObjectAttachmentWithoutConvert(TIMEOUT_KEY));
-
+                    Long timeout = RpcUtils.convertToNumber(rpcInvocation.getObjectAttachmentWithoutConvert(TIMEOUT_KEY));
                     if (timeout == null) {
                         timeout = (long) url.getMethodPositiveParameter(
                                 rpcInvocation.getMethodName(), TIMEOUT_KEY, DEFAULT_TIMEOUT);
                     }
+
                     long usage = bizProfiler.getEndTime() - bizProfiler.getStartTime();
                     if ((usage / (1000_000L * ProfilerSwitch.getWarnPercent())) > timeout) {
                         StringBuilder attachment = new StringBuilder();
@@ -99,6 +111,8 @@ public class InvocationUtil {
                     }
                 }
             }
+
+
             return invoker.invoke(rpcInvocation).recreate();
         } finally {
             RpcContext.restoreServiceContext(originServiceContext);

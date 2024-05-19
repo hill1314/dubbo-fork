@@ -71,6 +71,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         this.retryPeriod = url.getParameter(REGISTRY_RETRY_PERIOD_KEY, DEFAULT_REGISTRY_RETRY_PERIOD);
 
         // since the retry task will not be very much. 128 ticks is enough.
+        //时间轮 算法，进行 延迟任务的管理
         retryTimer = new HashedWheelTimer(
                 new NamedThreadFactory("DubboRegistryRetryTimer", true), retryPeriod, TimeUnit.MILLISECONDS, 128);
     }
@@ -93,6 +94,11 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         failedUnsubscribed.remove(h);
     }
 
+    /**
+     * 添加失败的注册任务到时间轮
+     *
+     * @param url url
+     */
     private void addFailedRegistered(URL url) {
         FailedRegisteredTask oldOne = failedRegistered.get(url);
         if (oldOne != null) {
@@ -208,6 +214,11 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         return failedUnsubscribed;
     }
 
+    /**
+     * 注册
+     *
+     * @param url url
+     */
     @Override
     public void register(URL url) {
         if (!acceptable(url)) {
@@ -247,6 +258,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             }
 
             // Record a failed registration request to a failed list, retry regularly
+            //重试任务添加到 时间轮
             addFailedRegistered(url);
         }
     }
@@ -411,6 +423,13 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         }
     }
 
+    /**
+     * 通知
+     *
+     * @param url      url
+     * @param listener 听众
+     * @param urls     url
+     */
     @Override
     protected void notify(URL url, NotifyListener listener, List<URL> urls) {
         if (url == null) {
