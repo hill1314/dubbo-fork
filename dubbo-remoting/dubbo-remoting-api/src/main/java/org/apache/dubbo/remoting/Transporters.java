@@ -22,6 +22,10 @@ import org.apache.dubbo.remoting.transport.ChannelHandlerDispatcher;
 
 /**
  * Transporter facade. (API, Static, ThreadSafe)
+ * 数据传输层
+ *
+ * @author huleilei9
+ * @date 2024/05/19
  */
 public class Transporters {
 
@@ -31,6 +35,14 @@ public class Transporters {
         return bind(URL.valueOf(url), handler);
     }
 
+    /**
+     * 绑定
+     *
+     * @param url      url
+     * @param handlers 处理程序
+     * @return {@link RemotingServer}
+     * @throws RemotingException RemotingException.(API,Prototype,ThreadSafe)
+     */
     public static RemotingServer bind(URL url, ChannelHandler... handlers) throws RemotingException {
         if (url == null) {
             throw new IllegalArgumentException("url == null");
@@ -63,6 +75,7 @@ public class Transporters {
         } else {
             handler = new ChannelHandlerDispatcher(handlers);
         }
+        //
         return getTransporter(url).connect(url, handler);
     }
 

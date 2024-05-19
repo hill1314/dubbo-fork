@@ -58,6 +58,9 @@ public class HeaderExchangeServer implements ExchangeServer {
 
     protected final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(getClass());
 
+    /**
+     * 远程服务
+     */
     private final RemotingServer server;
 
     private final AtomicBoolean closed = new AtomicBoolean(false);
@@ -69,9 +72,15 @@ public class HeaderExchangeServer implements ExchangeServer {
 
     private CloseTimerTask closeTimer;
 
+    /**
+     * 数据交换 服务
+     *
+     * @param server 服务器
+     */
     public HeaderExchangeServer(RemotingServer server) {
         Assert.notNull(server, "server == null");
         this.server = server;
+        // 开启服务心跳检查任务
         startIdleCheckTask(getUrl());
     }
 

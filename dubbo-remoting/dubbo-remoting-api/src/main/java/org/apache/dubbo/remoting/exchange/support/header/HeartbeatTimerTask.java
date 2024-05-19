@@ -53,6 +53,8 @@ public class HeartbeatTimerTask extends AbstractTimerTask {
                 req.setVersion(Version.getProtocolVersion());
                 req.setTwoWay(true);
                 req.setEvent(HEARTBEAT_EVENT);
+
+                //发送心跳检查请求
                 channel.send(req);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Send heartbeat to remote channel " + channel.getRemoteAddress()

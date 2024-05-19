@@ -61,7 +61,8 @@ public class NettyPortUnificationServer extends AbstractPortUnificationServer {
     private static final ErrorTypeAwareLogger logger =
             LoggerFactory.getErrorTypeAwareLogger(NettyPortUnificationServer.class);
 
-    private Map<String, Channel> dubboChannels = new ConcurrentHashMap<>(); // <ip:port, channel>
+    // <ip:port, channel>
+    private Map<String, Channel> dubboChannels = new ConcurrentHashMap<>();
 
     private ServerBootstrap bootstrap;
 
@@ -89,6 +90,9 @@ public class NettyPortUnificationServer extends AbstractPortUnificationServer {
         }
     }
 
+    /**
+     * 开启netty 服务监听
+     */
     @Override
     protected void doOpen() {
         NettyHelper.setNettyLoggerFactory();
@@ -97,10 +101,13 @@ public class NettyPortUnificationServer extends AbstractPortUnificationServer {
                 Executors.newCachedThreadPool(new NamedThreadFactory(EVENT_LOOP_WORKER_POOL_NAME, true));
         ChannelFactory channelFactory = new NioServerSocketChannelFactory(
                 boss, worker, getUrl().getPositiveParameter(IO_THREADS_KEY, Constants.DEFAULT_IO_THREADS));
+
+        //
         bootstrap = new ServerBootstrap(channelFactory);
 
         final NettyHandler nettyHandler = new NettyHandler(getUrl(), this);
         dubboChannels = nettyHandler.getChannels();
+
         // https://issues.jboss.org/browse/NETTY-365
         // https://issues.jboss.org/browse/NETTY-379
         // final Timer timer = new HashedWheelTimer(new NamedThreadFactory("NettyIdleTimer", true));
@@ -109,8 +116,8 @@ public class NettyPortUnificationServer extends AbstractPortUnificationServer {
         bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
             @Override
             public ChannelPipeline getPipeline() {
-                NettyCodecAdapter adapter =
-                        new NettyCodecAdapter(getCodec(), getUrl(), NettyPortUnificationServer.this);
+                NettyCodecAdapter adapter = new NettyCodecAdapter(getCodec(), getUrl(), NettyPortUnificationServer.this);
+
                 ChannelPipeline pipeline = Channels.pipeline();
                 /*int idleTimeout = getIdleTimeout();
                 if (idleTimeout > 10000) {
@@ -122,12 +129,15 @@ public class NettyPortUnificationServer extends AbstractPortUnificationServer {
                 return pipeline;
             }
         });
+
         // bind
         String bindIp = getUrl().getParameter(Constants.BIND_IP_KEY, getUrl().getHost());
         int bindPort = getUrl().getParameter(Constants.BIND_PORT_KEY, getUrl().getPort());
         if (getUrl().getParameter(ANYHOST_KEY, false) || NetUtils.isInvalidLocalHost(bindIp)) {
             bindIp = ANYHOST_VALUE;
         }
+
+        //
         InetSocketAddress bindAddress = new InetSocketAddress(bindIp, bindPort);
         channel = bootstrap.bind(bindAddress);
     }

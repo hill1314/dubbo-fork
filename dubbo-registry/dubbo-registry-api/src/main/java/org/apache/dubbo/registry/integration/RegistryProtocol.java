@@ -135,7 +135,10 @@ import static org.apache.dubbo.rpc.cluster.Constants.WEIGHT_KEY;
 import static org.apache.dubbo.rpc.model.ScopeModelUtil.getApplicationModel;
 
 /**
- * TODO, replace RegistryProtocol completely in the future.
+ * TODO1, replace RegistryProtocol completely in the future.
+ *
+ * @author huleilei9
+ * @date 2024/05/19
  */
 public class RegistryProtocol implements Protocol, ScopeModelAware {
     public static final String[] DEFAULT_REGISTER_PROVIDER_KEYS = {
@@ -209,6 +212,12 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
         return map;
     }
 
+    /**
+     * 注册
+     *
+     * @param registry              注册表
+     * @param registeredProviderUrl 已注册提供程序url
+     */
     private static void register(Registry registry, URL registeredProviderUrl) {
         ApplicationDeployer deployer =
                 registeredProviderUrl.getOrDefaultApplicationModel().getDeployer();
@@ -242,8 +251,10 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
 
     @Override
     public <T> Exporter<T> export(final Invoker<T> originInvoker) throws RpcException {
+        //注册中心地址
         URL registryUrl = getRegistryUrl(originInvoker);
         // url to export locally
+        //要发布的的具体协议的服务地址
         URL providerUrl = getProviderUrl(originInvoker);
 
         // Subscribe the override data
@@ -259,16 +270,19 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
                 .add(overrideSubscribeListener);
 
         providerUrl = overrideUrlWithConfig(providerUrl, overrideSubscribeListener);
-        // export invoker
+
+        // export invoker  my-note 先发布协议监听（将 originInvoker 存储在协议层，调当前配置的协议来暴露服务监听，保证可以接收服务请求）
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker, providerUrl);
 
-        // url to registry
+        // url to registry my-note 要注册到的url地址
         final Registry registry = getRegistry(registryUrl);
+        // my-note 服务提供方地址
         final URL registeredProviderUrl = customizeURL(providerUrl, registryUrl);
 
         // decide if we need to delay publish (provider itself and registry should both need to register)
         boolean register = providerUrl.getParameter(REGISTER_KEY, true) && registryUrl.getParameter(REGISTER_KEY, true);
         if (register) {
+            //my-note 注册
             register(registry, registeredProviderUrl);
         }
 
@@ -298,9 +312,11 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
 
     private <T> void notifyExport(ExporterChangeableWrapper<T> exporter) {
         ScopeModel scopeModel = exporter.getRegisterUrl().getScopeModel();
+
         List<RegistryProtocolListener> listeners = ScopeModelUtil.getExtensionLoader(
                         RegistryProtocolListener.class, scopeModel)
                 .getActivateExtension(exporter.getOriginInvoker().getUrl(), REGISTRY_PROTOCOL_LISTENER_KEY);
+
         if (CollectionUtils.isNotEmpty(listeners)) {
             for (RegistryProtocolListener listener : listeners) {
                 listener.onExport(this, exporter);
@@ -318,6 +334,13 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
         return serviceConfigurationListener.overrideUrl(providerUrl);
     }
 
+    /**
+     * 进行本地发布
+     *
+     * @param originInvoker 原始调用程序
+     * @param providerUrl   提供程序url
+     * @return {@link ExporterChangeableWrapper}<{@link T}>
+     */
     @SuppressWarnings("unchecked")
     private <T> ExporterChangeableWrapper<T> doLocalExport(final Invoker<T> originInvoker, URL providerUrl) {
         String providerUrlKey = getProviderUrlKey(originInvoker);
@@ -325,7 +348,11 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
         Invoker<?> invokerDelegate = new InvokerDelegate<>(originInvoker, providerUrl);
 
         ReferenceCountExporter<?> exporter =
-                exporterFactory.createExporter(providerUrlKey, () -> protocol.export(invokerDelegate));
+                exporterFactory.createExporter(providerUrlKey,
+                        //my-note 具体写协议的export(dubbo/http...)
+                        () -> protocol.export(invokerDelegate));
+
+        //放到本地缓存
         return (ExporterChangeableWrapper<T>) bounds.computeIfAbsent(providerUrlKey, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(
                         registryUrlKey,

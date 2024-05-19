@@ -83,8 +83,8 @@ public class JavassistProxyFactory extends AbstractProxyFactory {
     public <T> Invoker<T> getInvoker(T proxy, Class<T> type, URL url) {
         try {
             // TODO Wrapper cannot handle this scenario correctly: the classname contains '$'
-            final Wrapper wrapper =
-                    Wrapper.getWrapper(proxy.getClass().getName().indexOf('$') < 0 ? proxy.getClass() : type);
+            //动态生成一个 包装类，包装类中持有 服务实例，在里面完成对服务实例方法的调用
+            final Wrapper wrapper = Wrapper.getWrapper(proxy.getClass().getName().indexOf('$') < 0 ? proxy.getClass() : type);
             return new AbstractProxyInvoker<T>(proxy, type, url) {
                 @Override
                 protected Object doInvoke(T proxy, String methodName, Class<?>[] parameterTypes, Object[] arguments)
@@ -95,6 +95,7 @@ public class JavassistProxyFactory extends AbstractProxyFactory {
             };
         } catch (Throwable fromJavassist) {
             // try fall back to JDK proxy factory
+            // 异常时 尝试改为使用JDK代理工厂 生成代理
             try {
                 Invoker<T> invoker = jdkProxyFactory.getInvoker(proxy, type, url);
                 logger.error(

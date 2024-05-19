@@ -22,6 +22,12 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 服务发布工厂
+ *
+ * @author huleilei9
+ * @date 2024/05/19
+ */
 public class ExporterFactory {
     private final Map<String, ReferenceCountExporter<?>> exporters = new ConcurrentHashMap<>();
 

@@ -31,7 +31,8 @@ import static org.apache.dubbo.remoting.Constants.IS_PU_SERVER_KEY;
 /**
  * DefaultMessenger
  *
- *
+ * @author huleilei9
+ * @date 2024/05/19
  */
 public class HeaderExchanger implements Exchanger {
 
@@ -43,12 +44,22 @@ public class HeaderExchanger implements Exchanger {
                 Transporters.connect(url, new DecodeHandler(new HeaderExchangeHandler(handler))), true);
     }
 
+    /**
+     * 绑定
+     *
+     * @param url     url
+     * @param handler 处理程序
+     * @return {@link ExchangeServer}
+     * @throws RemotingException RemotingException.(API,Prototype,ThreadSafe)
+     */
     @Override
     public ExchangeServer bind(URL url, ExchangeHandler handler) throws RemotingException {
         ExchangeServer server;
         boolean isPuServerKey = url.getParameter(IS_PU_SERVER_KEY, false);
         if (isPuServerKey) {
             server = new HeaderExchangeServer(
+                    //多协议端口复用 https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/port-unification/
+                    //对原始 handler 又进行了两层包装
                     PortUnificationExchanger.bind(url, new DecodeHandler(new HeaderExchangeHandler(handler))));
         } else {
             server = new HeaderExchangeServer(

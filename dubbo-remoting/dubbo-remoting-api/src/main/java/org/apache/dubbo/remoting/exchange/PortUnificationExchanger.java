@@ -33,6 +33,13 @@ import java.util.concurrent.ConcurrentMap;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.PROTOCOL_ERROR_CLOSE_SERVER;
 
+/**
+ * 端口统一交换机
+ * https://cn.dubbo.apache.org/zh-cn/overview/mannual/java-sdk/advanced-features-and-usage/service/port-unification/
+ *
+ * @author huleilei9
+ * @date 2024/05/19
+ */
 public class PortUnificationExchanger {
 
     private static final ErrorTypeAwareLogger log =
@@ -40,15 +47,20 @@ public class PortUnificationExchanger {
     private static final ConcurrentMap<String, RemotingServer> servers = new ConcurrentHashMap<>();
 
     public static RemotingServer bind(URL url, ChannelHandler handler) {
-        ConcurrentHashMapUtils.computeIfAbsent(servers, url.getAddress(), addr -> {
-            final AbstractPortUnificationServer server;
-            try {
-                server = getTransporter(url).bind(url, handler);
-            } catch (RemotingException e) {
-                throw new RuntimeException(e);
-            }
-            // server.bind();
-            return server;
+
+        ConcurrentHashMapUtils.computeIfAbsent(servers,
+                //ip+port
+                url.getAddress(),
+                addr -> {
+                    final AbstractPortUnificationServer server;
+                    try {
+                        //绑定
+                        server = getTransporter(url).bind(url, handler);
+                    } catch (RemotingException e) {
+                        throw new RuntimeException(e);
+                    }
+                    // server.bind();
+                    return server;
         });
 
         servers.computeIfPresent(url.getAddress(), (addr, server) -> {

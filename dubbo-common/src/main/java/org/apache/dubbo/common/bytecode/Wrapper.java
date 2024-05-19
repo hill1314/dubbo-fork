@@ -82,6 +82,17 @@ public abstract class Wrapper {
             return false;
         }
 
+        /**
+         * invoke方法
+         * 这只是一个兜底，真实的方法 是动态生成的 @see getWrapper
+         *
+         * @param instance 例子
+         * @param mn       mn
+         * @param types    类型
+         * @param args     args
+         * @return {@link Object}
+         * @throws NoSuchMethodException NoSuchMethodException.
+         */
         @Override
         public Object invokeMethod(Object instance, String mn, Class<?>[] types, Object[] args)
                 throws NoSuchMethodException {
@@ -121,6 +132,7 @@ public abstract class Wrapper {
             return OBJECT_WRAPPER;
         }
 
+        //动态生成包装类内容，并放入缓存
         return ConcurrentHashMapUtils.computeIfAbsent(WRAPPER_MAP, c, Wrapper::makeWrapper);
     }
 

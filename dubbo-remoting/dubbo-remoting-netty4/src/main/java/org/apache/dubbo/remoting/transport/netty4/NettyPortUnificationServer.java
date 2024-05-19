@@ -106,9 +106,13 @@ public class NettyPortUnificationServer extends AbstractPortUnificationServer {
 
     @Override
     public void doOpen() throws Throwable {
+
         bootstrap = new ServerBootstrap();
 
+        //主线程
         bossGroup = NettyEventLoopFactory.eventLoopGroup(1, EVENT_LOOP_BOSS_POOL_NAME);
+
+        //工作线程
         workerGroup = NettyEventLoopFactory.eventLoopGroup(
                 getUrl().getPositiveParameter(IO_THREADS_KEY, Constants.DEFAULT_IO_THREADS),
                 EVENT_LOOP_WORKER_POOL_NAME);
@@ -126,6 +130,8 @@ public class NettyPortUnificationServer extends AbstractPortUnificationServer {
                         final ChannelPipeline p = ch.pipeline();
                         NettyChannelHandler nettyChannelHandler =
                                 new NettyChannelHandler(dubboChannels, getUrl(), NettyPortUnificationServer.this);
+
+                        //协议适配的handler
                         NettyPortUnificationServerHandler puHandler = new NettyPortUnificationServerHandler(
                                 getUrl(),
                                 true,
@@ -133,6 +139,7 @@ public class NettyPortUnificationServer extends AbstractPortUnificationServer {
                                 NettyPortUnificationServer.this,
                                 getSupportedUrls(),
                                 getSupportedHandlers());
+
                         p.addLast("channel-handler", nettyChannelHandler);
                         p.addLast("negotiation-protocol", puHandler);
                     }

@@ -25,6 +25,9 @@ import org.apache.dubbo.remoting.Transporter;
 
 /**
  * Default extension of {@link Transporter} using netty4.x.
+ *
+ * @author huleilei9
+ * @date 2024/05/19
  */
 public class NettyTransporter implements Transporter {
 

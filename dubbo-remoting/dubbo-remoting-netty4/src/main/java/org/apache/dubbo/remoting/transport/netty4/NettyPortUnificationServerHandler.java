@@ -45,6 +45,12 @@ import io.netty.handler.ssl.SslHandshakeCompletionEvent;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.INTERNAL_ERROR;
 
+/**
+ * netty端口统一服务器处理程序
+ *
+ * @author huleilei9
+ * @date 2024/05/19
+ */
 public class NettyPortUnificationServerHandler extends ByteToMessageDecoder {
 
     private static final ErrorTypeAwareLogger LOGGER =
@@ -102,12 +108,21 @@ public class NettyPortUnificationServerHandler extends ByteToMessageDecoder {
         super.userEventTriggered(ctx, evt);
     }
 
+    /**
+     * 解码
+     *
+     * @param ctx ctx
+     * @param in  在里面
+     * @param out 出来
+     * @throws Exception 例外
+     */
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         // Will use the first five bytes to detect a protocol.
         // size of telnet command ls is 2 bytes
         if (in.readableBytes() < 2) {
+            //少于两个字节的 认为是非法请求，不处理
             return;
         }
 
@@ -128,16 +143,23 @@ public class NettyPortUnificationServerHandler extends ByteToMessageDecoder {
                 ChannelBuffer buf = new NettyBackedChannelBuffer(in);
                 final ProtocolDetector.Result result = protocol.detector().detect(buf);
                 in.resetReaderIndex();
+
                 switch (result) {
                     case UNRECOGNIZED:
+                        //未识别，继续
                         continue;
                     case RECOGNIZED:
+                        //识别
                         ChannelHandler localHandler = this.handlerMapper.getOrDefault(name, handler);
                         URL localURL = this.urlMapper.getOrDefault(name, url);
                         channel.setUrl(localURL);
+
+                        //配置对应协议的处理器
                         NettyConfigOperator operator = new NettyConfigOperator(channel, localHandler);
                         protocol.configServerProtocolHandler(url, operator);
+
                         ctx.pipeline().remove(this);
+
                     case NEED_MORE_DATA:
                         return;
                     default:

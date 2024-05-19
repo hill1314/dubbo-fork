@@ -108,6 +108,9 @@ public class DubboProtocol extends AbstractProtocol {
 
     private final AtomicBoolean destroyed = new AtomicBoolean();
 
+    /**
+     * 请求处理程序
+     */
     private final ExchangeHandler requestHandler;
 
     public DubboProtocol(FrameworkModel frameworkModel) {
@@ -127,6 +130,7 @@ public class DubboProtocol extends AbstractProtocol {
                                     + channel.getLocalAddress());
                 }
 
+                //获取代理
                 Invocation inv = (Invocation) message;
                 Invoker<?> invoker = inv.getInvoker() == null ? getInvoker(channel, inv) : inv.getInvoker();
                 // switch TCCL
@@ -163,7 +167,10 @@ public class DubboProtocol extends AbstractProtocol {
                         return null;
                     }
                 }
+
                 RpcContext.getServiceContext().setRemoteAddress(channel.getRemoteAddress());
+
+                //代理反射调用，处理客户端请求
                 Result result = invoker.invoke(inv);
                 return result.thenApply(Function.identity());
             }
@@ -338,12 +345,17 @@ public class DubboProtocol extends AbstractProtocol {
         URL url = invoker.getUrl();
 
         // export service.
+        //key：com...*Service
         String key = serviceKey(url);
+        //invoker 服务执行
         DubboExporter<T> exporter = new DubboExporter<T>(invoker, key, exporterMap);
 
         // export a stub service for dispatching event
+        //存根：用于客户端在调服务端之前先执行一些本地逻辑
         boolean isStubSupportEvent = url.getParameter(STUB_EVENT_KEY, DEFAULT_STUB_EVENT);
+        //回调：客户端调用服务端完成后，服务端对客户端的回调
         boolean isCallbackService = url.getParameter(IS_CALLBACK_SERVICE, false);
+
         if (isStubSupportEvent && !isCallbackService) {
             String stubServiceMethods = url.getParameter(STUB_EVENT_METHODS_KEY);
             if (stubServiceMethods == null || stubServiceMethods.length() == 0) {
@@ -358,7 +370,10 @@ public class DubboProtocol extends AbstractProtocol {
             }
         }
 
+        //开启服务
         openServer(url);
+
+        //序列号优化
         optimizeSerialization(url);
 
         return exporter;
@@ -373,10 +388,12 @@ public class DubboProtocol extends AbstractProtocol {
 
         if (isServer) {
             ProtocolServer server = serverMap.get(key);
+            //双重检查锁
             if (server == null) {
                 synchronized (this) {
                     server = serverMap.get(key);
                     if (server == null) {
+                        //创建服务
                         serverMap.put(key, createServer(url));
                         return;
                     }
@@ -394,6 +411,12 @@ public class DubboProtocol extends AbstractProtocol {
         }
     }
 
+    /**
+     * 创建服务
+     *
+     * @param url url
+     * @return {@link ProtocolServer}
+     */
     private ProtocolServer createServer(URL url) {
         url = URLBuilder.from(url)
                 // send readonly event when server closes, it's enabled by default
@@ -403,6 +426,7 @@ public class DubboProtocol extends AbstractProtocol {
                 .addParameter(CODEC_KEY, DubboCodec.NAME)
                 .build();
 
+        //协议对应服务端实现类型，dubbo默认的是 mina、netty
         String transporter = url.getParameter(SERVER_KEY, DEFAULT_REMOTING_SERVER);
         if (StringUtils.isNotEmpty(transporter)
                 && !url.getOrDefaultFrameworkModel()
@@ -413,11 +437,14 @@ public class DubboProtocol extends AbstractProtocol {
 
         ExchangeServer server;
         try {
+            //启动服务(Exchanger数据交换层，依赖 transport 传输层)
+            //requestHandler 请求处理程序，协议创建时 进行了初始化
             server = Exchangers.bind(url, requestHandler);
         } catch (RemotingException e) {
             throw new RpcException("Fail to start server(url: " + url + ") " + e.getMessage(), e);
         }
 
+        //客户端 实现类型
         transporter = url.getParameter(CLIENT_KEY);
         if (StringUtils.isNotEmpty(transporter)
                 && !url.getOrDefaultFrameworkModel()
@@ -426,6 +453,7 @@ public class DubboProtocol extends AbstractProtocol {
             throw new RpcException("Unsupported client type: " + transporter);
         }
 
+        //dubbo 协议服务
         DubboProtocolServer protocolServer = new DubboProtocolServer(server);
         loadServerProperties(protocolServer);
         return protocolServer;

@@ -152,12 +152,14 @@ public abstract class AbstractProtocol implements Protocol, ScopeModelAware {
     }
 
     /**
-     * 优化序列化
+     * 序列化优化
+     * 针对 Kryo等序列化 提前将需要进行序列化的类 注册到SerializableClassRegistry中
      *
      * @param url url
      * @throws RpcException RPCException.(API,Prototype,ThreadSafe)
      */
     protected void optimizeSerialization(URL url) throws RpcException {
+        //配置的序列化器的类名
         String className = url.getParameter(OPTIMIZER_KEY, "");
         if (StringUtils.isEmpty(className) || optimizers.contains(className)) {
             return;
@@ -180,6 +182,7 @@ public abstract class AbstractProtocol implements Protocol, ScopeModelAware {
             }
 
             for (Class c : optimizer.getSerializableClasses()) {
+                //注册到SerializableClassRegistry中
                 SerializableClassRegistry.registerClass(c);
             }
 

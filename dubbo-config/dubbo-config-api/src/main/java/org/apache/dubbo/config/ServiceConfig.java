@@ -1029,7 +1029,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
             invoker = new DelegateProviderMetaDataInvoker(invoker, this);
         }
 
-        //这里调的 protocol的 自适应 动态代理类 protocol$Adaptive()
+        //这里先调到 protocol的 自适应 动态代理类 protocol$Adaptive()，经过几个功能增强包装类之后 调到 RegistryProtocol
         Exporter<?> exporter = protocolSPI.export(invoker);
 
         exporters.computeIfAbsent(registerType, k -> new CopyOnWriteArrayList<>()).add(exporter);
